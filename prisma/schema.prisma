@@ -321,7 +321,8 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders Order[]
+  orders  Order[]
+  account CustomerAccount?
 
   @@map("customers")
 }
@@ -580,4 +581,46 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([at])
   @@map("audit_log")
+}
+
+enum AccountStatus {
+  active
+  disabled
+}
+
+model CustomerAccount {
+  id           String        @id @default(uuid()) @db.Uuid
+  customerId   String        @unique @db.Uuid
+  email        String        @unique
+  passwordHash String
+  status       AccountStatus @default(active)
+  failedLogins Int           @default(0)
+  lockedUntil  DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  customer      Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  refreshTokens CustomerRefreshToken[]
+
+  @@map("customer_accounts")
+}
+
+model CustomerRefreshToken {
+  id           String    @id @default(uuid()) @db.Uuid
+  accountId    String    @db.Uuid
+  tokenHash    String    @unique
+  familyId     String    @db.Uuid
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?   @db.Uuid
+  ip           String?
+  userAgent    String?
+  createdAt    DateTime  @default(now())
+
+  account CustomerAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([accountId])
+  @@map("customer_refresh_tokens")
 }
