@@ -96,13 +96,21 @@ export class CustomerAuthService {
           if (a.emailVerifiedAt || live) throw new DomainError(HttpStatus.CONFLICT, 'phone_taken', CONFLICT_MESSAGE.phone_taken);
           await tx.customerAccount.delete({ where: { id: a.id } }); // abandoned sign-up
         }
-        // A guest customer with this phone (earlier anonymous orders) is claimed so they keep their history.
-        const customer = existing
-          ? await tx.customer.update({ where: { id: existing.id }, data: { name, email: existing.email ?? email } })
-          : await tx.customer.create({ data: { phone, name, email } });
+        // A guest customer with this phone (earlier anonymous orders) is linked so they keep their history, but its
+        // details are left untouched until the email is verified.
+        const customer = existing ?? (await tx.customer.create({ data: { phone, name, email } }));
         const account = await tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash }, include: { customer: true } });
         return { kind: 'created' as const, account };
       });
+      if (outcome.kind === 'pending') {
+        // Someone else (or an attacker) already started this sign-up. Only the same password may continue it;
+        // otherwise activating it would hand the real owner an account whose password they did not choose.
+        const same = await argon2.verify(outcome.account.passwordHash, dto.password).catch(() => false);
+        if (!same) {
+          this.security.log('verification_failed', { accountId: outcome.account.id, ip: meta.ip, reason: 'signup_in_progress' });
+          throw new DomainError(HttpStatus.CONFLICT, 'signup_in_progress', 'A sign-up for this email is already in progress. Use the code we emailed, or try again in a few minutes.');
+        }
+      }
       if (outcome.kind === 'created') this.security.log('register', { accountId: outcome.account.id, email, ip: meta.ip });
       await this.sendCode(outcome.account, outcome.account.customer.name);
       return this.started(email);
@@ -152,7 +160,7 @@ export class CustomerAuthService {
   }
 
   /** Confirms the emailed code, activates the account, issues the first tokens and sends the welcome email. */
-  async verify(emailRaw: string, code: string, meta: Meta) {
+  async verify(emailRaw: string, code: string, password: string, meta: Meta) {
     const email = emailRaw.trim().toLowerCase();
     const invalid = (extra?: Record<string, unknown>) => new DomainError(HttpStatus.BAD_REQUEST, 'invalid_code', 'That code is not right', extra);
     const account = await this.prisma.customerAccount.findUnique({ where: { email }, include: { customer: true } });
@@ -166,9 +174,12 @@ export class CustomerAuthService {
     if (account.verifyAttempts >= OTP.maxAttempts) {
       throw new DomainError(HttpStatus.BAD_REQUEST, 'too_many_attempts', 'Too many wrong codes. Request a new one.');
     }
-    if (!codesMatch(account.verifyCodeHash, hashCode(code, account.id, this.cfg.jwtAccessSecret))) {
+    // Both factors are always checked, so a wrong password and a wrong code look the same and cost the same.
+    const codeOk = codesMatch(account.verifyCodeHash, hashCode(code, account.id, this.cfg.jwtAccessSecret));
+    const passwordOk = await argon2.verify(account.passwordHash, password).catch(() => false);
+    if (!codeOk || !passwordOk) {
       const updated = await this.prisma.customerAccount.update({ where: { id: account.id }, data: { verifyAttempts: { increment: 1 } } });
-      this.security.log('verification_failed', { accountId: account.id, ip: meta.ip, reason: 'wrong_code' });
+      this.security.log('verification_failed', { accountId: account.id, ip: meta.ip, reason: 'wrong_code_or_password' });
       throw invalid({ remainingAttempts: Math.max(0, OTP.maxAttempts - updated.verifyAttempts) });
     }
     // Claim atomically so two parallel requests with the right code cannot both activate and both get tokens.

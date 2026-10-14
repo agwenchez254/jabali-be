@@ -37,7 +37,7 @@ export class CustomerAuthController {
   @HttpCode(200)
   @RateLimit(perMinute('verify', 10, 'ip'), perMinute('verify-email', 10, 'email'))
   async verify(@Body() dto: VerifyEmailDto, @Req() req: Request) {
-    const { customer, tokens } = await this.auth.verify(dto.email, dto.code, meta(req));
+    const { customer, tokens } = await this.auth.verify(dto.email, dto.code, dto.password, meta(req));
     return body(customer, tokens);
   }
 

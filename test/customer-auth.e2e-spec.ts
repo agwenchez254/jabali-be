@@ -29,7 +29,7 @@ describe('customer auth', () => {
     return { name: 'Amina Said', email: `amina${n}@example.com`, phone: phoneFor(n), password: PASSWORD, ...over };
   };
   const register = (body: ReturnType<typeof newAccount>) => fetch(`${base}/store/auth/register`, json(body));
-  const verify = (email: string, code: string) => fetch(`${base}/store/auth/verify`, json({ email, code }));
+  const verify = (email: string, code: string, password = PASSWORD) => fetch(`${base}/store/auth/verify`, json({ email, code, password }));
   const resend = (email: string) => fetch(`${base}/store/auth/resend`, json({ email }));
   const login = (email: string, password: string) => fetch(`${base}/store/auth/login`, json({ email, password }));
   const authed = (token: string) => ({ authorization: `Bearer ${token}` });
@@ -71,6 +71,17 @@ describe('customer auth', () => {
       expect(mailsTo(acc.email).map((m) => m.subject)).toEqual(['Your Jabali verification code', 'Welcome to Jabali']);
       const me = await fetch(`${base}/store/me`, { headers: authed(session.accessToken) });
       expect(me.status).toBe(200);
+    });
+
+    it('needs the sign-up password as well as the code, and answers a wrong password like a wrong code', async () => {
+      const acc = newAccount();
+      await register(acc);
+      const code = lastCode(app, acc.email);
+      const wrong = await verify(acc.email, code, 'Some-other-password-77');
+      expect(wrong.status).toBe(400);
+      expect(((await wrong.json()) as { code?: string; remainingAttempts?: number })).toMatchObject({ code: 'invalid_code', remainingAttempts: 4 });
+      expect((await accountOf(acc.email))?.emailVerifiedAt).toBeNull();
+      expect((await verify(acc.email, code, acc.password)).status).toBe(200);
     });
 
     it('rejects a code once it has been used', async () => {
@@ -191,15 +202,44 @@ describe('customer auth', () => {
       expect((await register(newAccount({ phone: pending.phone }))).status).toBe(409);
     });
 
-    it('re-registering a pending email only re-sends the code and never changes the password', async () => {
+    it('re-sends the code when the same person signs up again with the same password', async () => {
       const acc = newAccount();
       await register(acc);
       await prisma.customerAccount.update({ where: { email: acc.email }, data: { verifySentAt: new Date(Date.now() - 61_000) } });
-      const again = await register({ ...acc, password: 'Attacker-chosen-password-9' });
+      const again = await register(acc);
       expect(again.status).toBe(201);
+      expect(mailsTo(acc.email).filter((m) => /verification code/i.test(m.subject))).toHaveLength(2);
       expect((await verify(acc.email, lastCode(app, acc.email))).status).toBe(200);
-      expect((await login(acc.email, acc.password)).status).toBe(200);
-      expect((await login(acc.email, 'Attacker-chosen-password-9')).status).toBe(401);
+    });
+
+    it('cannot be pre-hijacked: an attacker who signs up first with the victim email never gets the victim an account with the attacker password', async () => {
+      const victim = newAccount();
+      const attackerPassword = 'Attacker-chosen-password-9';
+      // 1. the attacker starts a sign-up for the victim's address (the code goes to the victim's inbox)
+      expect((await register({ ...victim, password: attackerPassword })).status).toBe(201);
+      // 2. the victim signs up for real, with their own password, while that is still pending
+      const second = await register(victim);
+      expect(second.status).toBe(409);
+      expect(((await second.json()) as { code?: string }).code).toBe('signup_in_progress');
+      // 3. even if the victim types the code they received, activation needs the password the pending account holds
+      const code = lastCode(app, victim.email);
+      expect((await verify(victim.email, code, victim.password)).status).toBe(400);
+      expect((await accountOf(victim.email))?.emailVerifiedAt).toBeNull();
+      // 4. once the attacker's pending sign-up lapses, the victim can sign up and activate normally
+      await prisma.customerAccount.update({ where: { email: victim.email }, data: { verifyExpiresAt: new Date(Date.now() - 1000) } });
+      expect((await register(victim)).status).toBe(201);
+      expect((await verify(victim.email, lastCode(app, victim.email), victim.password)).status).toBe(200);
+      expect((await login(victim.email, victim.password)).status).toBe(200);
+      expect((await login(victim.email, attackerPassword)).status).toBe(401);
+    });
+
+    it('does not touch an existing guest customer until the email is verified', async () => {
+      const n = uniq();
+      const guest = await prisma.customer.create({ data: { name: 'Guest Buyer', phone: `+2547${String(40000000 + n).slice(-8)}`, email: 'guest.original@example.com' } });
+      await register(newAccount({ phone: `0${guest.phone.slice(4)}`, name: 'Someone Else' }));
+      const after = await prisma.customer.findUniqueOrThrow({ where: { id: guest.id } });
+      expect(after.name).toBe('Guest Buyer');
+      expect(after.email).toBe('guest.original@example.com');
     });
 
     it('frees the phone and email of an abandoned sign-up once its code has expired', async () => {

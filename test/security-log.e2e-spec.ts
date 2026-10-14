@@ -39,7 +39,7 @@ describe('security event logging', () => {
     expect((await fetch(`${base}/store/auth/register`, json(a))).status).toBe(201);
     expect(names()).toEqual(expect.arrayContaining(['register', 'verification_sent']));
     events.length = 0;
-    expect((await fetch(`${base}/store/auth/verify`, json({ email: a.email, code: lastCode(app, a.email) }))).status).toBe(200);
+    expect((await fetch(`${base}/store/auth/verify`, json({ email: a.email, code: lastCode(app, a.email), password: PASSWORD }))).status).toBe(200);
     expect(names()).toEqual(['email_verified']);
     events.length = 0;
     expect((await login(a.email, PASSWORD)).status).toBe(200);
@@ -51,8 +51,8 @@ describe('security event logging', () => {
     await fetch(`${base}/store/auth/register`, json(a));
     events.length = 0;
     const right = lastCode(app, a.email);
-    await fetch(`${base}/store/auth/verify`, json({ email: a.email, code: right === '000000' ? '000001' : '000000' }));
-    expect(events[0]).toMatchObject({ event: 'verification_failed', fields: { reason: 'wrong_code' } });
+    await fetch(`${base}/store/auth/verify`, json({ email: a.email, code: right === '000000' ? '000001' : '000000', password: PASSWORD }));
+    expect(events[0]).toMatchObject({ event: 'verification_failed', fields: { reason: 'wrong_code_or_password' } });
   });
 
   it('logs failures, the lock-out and an unknown email', async () => {
@@ -101,7 +101,7 @@ describe('security event logging', () => {
     const a = acct('log.secret@example.com', '0711000005');
     await fetch(`${base}/store/auth/register`, json(a));
     const code = lastCode(app, a.email);
-    await fetch(`${base}/store/auth/verify`, json({ email: a.email, code }));
+    await fetch(`${base}/store/auth/verify`, json({ email: a.email, code, password: PASSWORD }));
     await login(a.email, 'definitely-wrong-password');
     const blob = JSON.stringify(events);
     expect(blob).not.toContain(PASSWORD);

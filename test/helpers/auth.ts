@@ -30,7 +30,7 @@ export interface NewAccount {
 export async function registerVerified(app: NestExpressApplication, base: string, body: NewAccount): Promise<Session> {
   const reg = await fetch(`${base}/store/auth/register`, json(body));
   if (reg.status !== 201) throw new Error(`register failed: ${reg.status} ${await reg.text()}`);
-  const res = await fetch(`${base}/store/auth/verify`, json({ email: body.email, code: lastCode(app, body.email) }));
+  const res = await fetch(`${base}/store/auth/verify`, json({ email: body.email, code: lastCode(app, body.email), password: body.password }));
   if (res.status !== 200) throw new Error(`verify failed: ${res.status} ${await res.text()}`);
   return (await res.json()) as Session;
 }
