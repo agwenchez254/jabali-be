@@ -17,5 +17,13 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  mailpit:
+    # Dev-only mail catcher: nothing is delivered to real addresses. SMTP on 1025, inbox UI and API on 8025.
+    image: axllent/mailpit:latest
+    container_name: jabali-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 volumes:
   jabali_pgdata:

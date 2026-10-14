@@ -30,8 +30,8 @@ This document does not claim ISO certification or compliance. ISO 27001 certifie
 | 20 | Vulnerable dependencies: `npm audit --omit=dev --audit-level=high` passes in both repos | 14.2.1 | A.8.8 | `package.json` scripts and overrides | `npm run audit` | Implemented (see advisories below) |
 | 21 | Error handling: RFC 7807 problem responses, no stack traces, generic client errors | 7.4.1 | A.8.28 | `problem-details.filter.ts`, `ErrorState.tsx` | existing | Implemented |
 | 22 | Client token handling: access token in memory only, refresh token in `localStorage` | 3.2.3, 8.2.1 | A.8.24 | `src/store/authPersist.ts` | `authPersist.test.ts` | Partial: refresh token readable by injected script (mitigated by CSP) |
-| 23 | Email verification, password reset | 2.1.x, 2.5.x | A.5.17 | not built (no mail provider) | n/a | Organisational gap |
-| 24 | Phone ownership verification (a guest customer record is claimed by phone at sign-up) | 2.7.x | A.5.16 | not built (no SMS provider) | n/a | Organisational gap |
+| 23 | Password reset (email verification at sign-up is row 34; the mail transport now exists, the reset flow is not built) | 2.5.x | A.5.17 | not built | n/a | Organisational gap |
+| 24 | Phone ownership verification. A verified-email account is linked by phone to an existing guest `Customer` (so new orders attach to it), but never sees or edits that record (row 36). Order history for accounts must wait for phone verification. | 2.7.x | A.5.16 | not built (no SMS provider) | n/a | Organisational gap |
 | 25 | Customer MFA | 2.8.x | A.8.5 | not built | n/a | Organisational gap |
 | 26 | ISMS scope, security policies, roles and responsibilities | n/a | A.5.1, A.5.2, A.5.4 | n/a | n/a | Organisational gap |
 | 27 | Risk assessment and treatment plan | n/a | clause 6.1 | n/a | n/a | Organisational gap |
@@ -41,6 +41,14 @@ This document does not claim ISO certification or compliance. ISO 27001 certifie
 | 31 | Independent penetration test | n/a | A.8.29 | n/a | n/a | Organisational gap |
 | 32 | Edge WAF and DDoS protection; shared rate-limit store for multiple API instances | n/a | A.8.20, A.8.6 | n/a | n/a | Organisational gap |
 | 33 | Secrets manager and rotation; central log shipping, alerting and retention | n/a | A.8.15, A.8.16, A.5.17 | n/a | n/a | Organisational gap |
+| 34 | Email verification at sign-up: 6-digit code from a CSPRNG, stored only as a keyed hash, 10 minute expiry, 5 attempts then void, constant-time compare; no tokens until verified; unverified accounts cannot sign in | 2.2.x, 2.3.x, 2.7.x | A.5.17, A.8.5 | `src/customer-auth/otp.ts`, `customer-auth.service.ts` | `otp.spec.ts`, `customer-auth.e2e-spec.ts` | Implemented |
+| 35 | Resend and verify cannot be used to probe for accounts or flood a mailbox: identical responses for any email, 60 s cool-down and 5 codes per hour enforced silently, plus per-IP and per-email rate limits | 2.2.1, 2.2.3 | A.8.5, A.8.6 | `customer-auth.service.ts`, `customer-auth.controller.ts` | `customer-auth.e2e-spec.ts` | Implemented |
+| 36 | No account pre-hijacking: activation needs the code AND the sign-up password; a pending sign-up cannot be continued with a different password; an abandoned sign-up frees its email and phone | 2.1.x, 3.x | A.5.15, A.8.3 | `customer-auth.service.ts` | e2e: pre-hijack scenario, password-bound verify | Implemented |
+| 36a | A linked guest `Customer` record is never exposed or modified by the account (own display name; phone not editable via profile) | 4.1.x, 8.x | A.8.3, A.8.12 | `customer-auth.service.ts` | e2e: guest details never shown or edited | Implemented |
+| 37 | Email content is HTML-escaped, subjects cannot carry extra headers, links use only the configured store URL | 5.3.3, 5.3.10 | A.8.28 | `src/mail/templates/*`, `mail.service.ts` | `templates.spec.ts`, `mail.service.spec.ts` | Implemented |
+| 38 | SMTP credentials only in environment variables; TLS required for `smtp://` in production; production refuses to start without SMTP | 9.1.x, 14.1.3 | A.8.24, A.8.9 | `config.ts`, `mail.service.ts` | `config.spec.ts` | Implemented |
+| 39 | Email logging masks recipients and never logs bodies or codes | 7.1.1, 7.1.2 | A.8.15 | `mail.service.ts`, `security-log.service.ts` | `mail.service.spec.ts`, `security-log.e2e-spec.ts` | Implemented |
+| 40 | Sender authentication for the mail domain (SPF, DKIM, DMARC) and mail delivery monitoring | n/a | A.8.20, A.5.14 | n/a | n/a | Organisational gap |
 
 ## Remaining dependency advisories
 
