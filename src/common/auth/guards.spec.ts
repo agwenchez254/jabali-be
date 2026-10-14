@@ -14,7 +14,7 @@ const staffToken = () => jwt.signAsync({ sub: 's1', email: 's@x.co', name: 'S', 
 const customerToken = () => jwt.signAsync({ sub: 'a1', typ: 'customer', cid: 'c1', email: 'c@x.co', name: 'C' });
 
 describe('JwtAuthGuard (staff)', () => {
-  const guard = new JwtAuthGuard(jwt);
+  const guard = new JwtAuthGuard(jwt, { log: jest.fn() } as never);
 
   it('accepts a staff token', async () => {
     const { req, context } = ctx(await staffToken());
@@ -29,7 +29,7 @@ describe('JwtAuthGuard (staff)', () => {
 });
 
 describe('CustomerAuthGuard', () => {
-  const guard = new CustomerAuthGuard(jwt);
+  const guard = new CustomerAuthGuard(jwt, { log: jest.fn() } as never);
 
   it('accepts a customer token and exposes the customer', async () => {
     const { req, context } = ctx(await customerToken());

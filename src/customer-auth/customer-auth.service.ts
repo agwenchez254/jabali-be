@@ -6,6 +6,7 @@ import { hashToken } from '../auth/auth.service';
 import { TokenPair } from '../auth/models';
 import { CustomerTokenPayload } from '../common/auth/auth.types';
 import { DomainError } from '../common/problem-details.filter';
+import { SecurityLogService } from '../common/security-log/security-log.service';
 import { isUniqueViolation, normalizePhone } from '../common/utils';
 import { APP_CONFIG, AppConfig } from '../config/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -46,6 +47,7 @@ export class CustomerAuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly security: SecurityLogService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
@@ -69,6 +71,7 @@ export class CustomerAuthService {
         return tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash }, include: { customer: true } });
       });
       const tokens = await this.issue(account, randomUUID(), meta);
+      this.security.log('register', { accountId: account.id, email, ip: meta.ip });
       return { customer: view(account), tokens };
     } catch (e) {
       if (isUniqueViolation(e)) {
@@ -83,12 +86,18 @@ export class CustomerAuthService {
     const account = await this.prisma.customerAccount.findUnique({ where: { email: emailRaw.trim().toLowerCase() }, include: { customer: true } });
     if (!account) {
       await argon2.verify(DUMMY_HASH, password).catch(() => false);
+      this.security.log('login_failed', { email: emailRaw, ip: meta.ip, reason: 'unknown_email' });
       throw new UnauthorizedException('Invalid email or password');
     }
-    if (account.lockedUntil && account.lockedUntil > new Date()) throw new UnauthorizedException('Invalid email or password');
+    if (account.lockedUntil && account.lockedUntil > new Date()) {
+      this.security.log('login_failed', { email: emailRaw, ip: meta.ip, accountId: account.id, reason: 'locked' });
+      throw new UnauthorizedException('Invalid email or password');
+    }
     const ok = await argon2.verify(account.passwordHash, password).catch(() => false);
     if (!ok) {
       const failed = account.failedLogins + 1;
+      this.security.log('login_failed', { email: emailRaw, ip: meta.ip, accountId: account.id, reason: 'bad_password' });
+      if (failed >= MAX_FAILED_LOGINS) this.security.log('account_locked', { accountId: account.id, ip: meta.ip });
       await this.prisma.customerAccount.update({
         where: { id: account.id },
         data: {
@@ -100,6 +109,7 @@ export class CustomerAuthService {
     }
     if (account.status !== 'active') throw new UnauthorizedException('Invalid email or password');
     await this.prisma.customerAccount.update({ where: { id: account.id }, data: { failedLogins: 0, lockedUntil: null, lastLoginAt: new Date() } });
+    this.security.log('login_success', { accountId: account.id, ip: meta.ip });
     const tokens = await this.issue(account, randomUUID(), meta);
     return { customer: view(account), tokens };
   }
@@ -108,6 +118,7 @@ export class CustomerAuthService {
     const row = await this.prisma.customerRefreshToken.findUnique({ where: { tokenHash: hashToken(raw) } });
     if (!row) throw new UnauthorizedException('Invalid refresh token');
     if (row.revokedAt) {
+      this.security.log('refresh_reuse', { accountId: row.accountId, ip: meta.ip });
       // reuse of a rotated token: assume theft and kill the whole family
       await this.prisma.customerRefreshToken.updateMany({ where: { familyId: row.familyId, revokedAt: null }, data: { revokedAt: new Date() } });
       throw new UnauthorizedException('Refresh token reuse detected');

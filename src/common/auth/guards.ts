@@ -2,13 +2,17 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Unauthor
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
+import { SecurityLogService } from '../security-log/security-log.service';
 import { AccessTokenPayload, AuthUser } from './auth.types';
 
 import { ANY_STAFF, REQUIRE_PERMISSIONS } from './constants';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly security: SecurityLogService,
+  ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest<Request & { user?: AuthUser }>();
@@ -16,7 +20,10 @@ export class JwtAuthGuard implements CanActivate {
     if (!header?.startsWith('Bearer ')) throw new UnauthorizedException('Missing bearer token');
     try {
       const p = await this.jwt.verifyAsync<AccessTokenPayload & { typ?: string }>(header.slice(7));
-      if (p.typ === 'customer') throw new UnauthorizedException('Invalid or expired token');
+      if (p.typ === 'customer') {
+        this.security.log('token_type_rejected', { ip: req.ip, expected: 'staff' });
+        throw new UnauthorizedException('Invalid or expired token');
+      }
       req.user = { id: p.sub, email: p.email, name: p.name, role: p.role, permissions: p.permissions };
       return true;
     } catch {

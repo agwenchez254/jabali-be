@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { APP_CONFIG, AppConfig } from '../../config/config';
 import { DomainError } from '../problem-details.filter';
+import { SecurityLogService } from '../security-log/security-log.service';
 import { RateLimiter } from './rate-limiter';
 
 export interface RateRule {
@@ -28,6 +29,7 @@ export class RateLimitGuard implements CanActivate {
 
   constructor(
     private readonly reflector: Reflector,
+    private readonly security: SecurityLogService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
@@ -45,6 +47,7 @@ export class RateLimitGuard implements CanActivate {
       const r = this.limiter.hit(`${rule.name}:${rule.by}:${path}:${subject}`, rule.limit, rule.windowMs);
       if (!r.allowed) {
         res.setHeader('Retry-After', String(r.retryAfterSec));
+        this.security.log('rate_limited', { rule: rule.name, ip: req.ip });
         throw new DomainError(HttpStatus.TOO_MANY_REQUESTS, 'rate_limited', 'Too many requests. Please wait and try again.');
       }
     }
