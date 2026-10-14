@@ -47,7 +47,7 @@ This document does not claim ISO certification or compliance. ISO 27001 certifie
 | 36a | A linked guest `Customer` record is never exposed or modified by the account (own display name; phone not editable via profile) | 4.1.x, 8.x | A.8.3, A.8.12 | `customer-auth.service.ts` | e2e: guest details never shown or edited | Implemented |
 | 37 | Email content is HTML-escaped, subjects cannot carry extra headers, links use only the configured store URL | 5.3.3, 5.3.10 | A.8.28 | `src/mail/templates/*`, `mail.service.ts` | `templates.spec.ts`, `mail.service.spec.ts` | Implemented |
 | 38 | SMTP credentials only in environment variables; TLS required for `smtp://` in production; production refuses to start without SMTP | 9.1.x, 14.1.3 | A.8.24, A.8.9 | `config.ts`, `mail.service.ts` | `config.spec.ts` | Implemented |
-| 39 | Email logging masks recipients and never logs bodies or codes | 7.1.1, 7.1.2 | A.8.15 | `mail.service.ts`, `security-log.service.ts` | `mail.service.spec.ts`, `security-log.e2e-spec.ts` | Implemented |
+| 39 | Email logging masks recipients and never logs bodies. Verification codes are never logged by the security log or the SMTP transport; the only place a code is printed is the development-only log-only transport (no SMTP server configured), which is switched off in production and unreachable there because production config requires `SMTP_URL` | 7.1.1, 7.1.2 | A.8.15 | `mail.service.ts`, `security-log.service.ts` | `mail.service.spec.ts`, `log-transport.spec.ts`, `security-log.e2e-spec.ts` | Implemented |
 | 40 | Sender authentication for the mail domain (SPF, DKIM, DMARC) and mail delivery monitoring | n/a | A.8.20, A.5.14 | n/a | n/a | Organisational gap |
 
 ## Remaining dependency advisories

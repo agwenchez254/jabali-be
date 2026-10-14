@@ -29,6 +29,17 @@ Sending is fire-and-forget with three attempts (now, after 2 s, after 10 s). A m
 
 Any SMTP provider works (Amazon SES SMTP, SendGrid, Mailgun, Zoho, Google Workspace app password). In production, connections to `smtp://` URLs require TLS.
 
+## No SMTP server yet? The code is printed in the API terminal
+
+While `SMTP_URL` is empty (development and test only), nothing is sent. The API terminal shows a line like
+
+```
+[Mail] SMTP_URL is not set, so this email was not sent: "Your Jabali verification code" to a***@example.com
+[Mail] DEV ONLY (no SMTP server configured) | verification code for amina@example.com: 042917
+```
+
+Type that code into the sign-up screen to activate the account. Only verification codes are printed this way: no other message content is ever logged. This cannot happen in production, where the API refuses to start without `SMTP_URL`, and the log-only transport also switches code printing off when `NODE_ENV=production` as a second guard.
+
 ## Try it locally
 
 1. `docker compose up -d mailpit` (SMTP on 1025, inbox UI on http://localhost:8025). This is a dev-only catcher: nothing is delivered to real addresses.

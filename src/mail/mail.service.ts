@@ -39,15 +39,27 @@ const sleep = (ms: number) =>
     t.unref();
   });
 
-/** Used when no SMTP server is configured (development and test): nothing leaves the machine. */
+/** The six digits of a verification-code email, or undefined for any other message. */
+const verificationCodeIn = (mail: OutgoingMail): string | undefined => (/verification code/i.test(mail.subject) ? /\b(\d{6})\b/.exec(mail.text)?.[1] : undefined);
+
+/**
+ * Used when no SMTP server is configured (development and test): nothing leaves the machine.
+ * With `showCodes` it also prints a verification code in the API terminal so sign-up can be finished without a mail
+ * server. That is safe only because production config refuses to start without SMTP_URL, and the provider below
+ * passes `showCodes = false` in production as a second guard. No other message content is ever printed.
+ */
 export class LogTransport implements MailTransport {
   readonly outbox: OutgoingMail[] = [];
   private readonly log = new Logger('Mail');
+
+  constructor(private readonly showCodes = true) {}
 
   sendMail(mail: OutgoingMail): Promise<{ messageId?: string }> {
     this.outbox.push(mail);
     if (this.outbox.length > 50) this.outbox.shift();
     this.log.log(`SMTP_URL is not set, so this email was not sent: "${mail.subject}" to ${maskEmail(mail.to)}`);
+    const code = this.showCodes ? verificationCodeIn(mail) : undefined;
+    if (code) this.log.log(`DEV ONLY (no SMTP server configured) | verification code for ${mail.to}: ${code}`);
     return Promise.resolve({ messageId: 'log-only' });
   }
 }
@@ -65,7 +77,7 @@ export const mailTransportProvider: Provider = {
           // Never send credentials or customer data over a plaintext SMTP session in production.
           requireTLS: cfg.nodeEnv === 'production' && cfg.mail.smtpUrl.startsWith('smtp:'),
         }) as unknown as MailTransport)
-      : new LogTransport(),
+      : new LogTransport(cfg.nodeEnv !== 'production'),
 };
 
 @Injectable()
