@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CacheModule } from './common/cache/cache.service';
 import { CartModule } from './cart/cart.module';
 import { CatalogueModule } from './catalogue/catalogue.module';
+import { CustomerAuthModule } from './customer-auth/customer-auth.module';
 import { CheckoutModule } from './checkout/checkout.controller';
 import { ConfigModule } from './config/config.module';
 import { ContentModule } from './content/content.module';
@@ -26,6 +27,7 @@ import { StoreEventsModule } from './store-events/store-events.module';
     CacheModule,
     StoreEventsModule,
     AuthModule,
+    CustomerAuthModule,
     StaffModule,
     CatalogueModule,
     InventoryModule,

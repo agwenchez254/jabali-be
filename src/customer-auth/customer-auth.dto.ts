@@ -1,0 +1,24 @@
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+
+export class RegisterDto {
+  @IsString() @MinLength(2) @MaxLength(120) name: string;
+  @IsEmail() @MaxLength(254) email: string;
+  /** Kenyan mobile, e.g. 0712345678 or +254712345678 */
+  @IsString() @MaxLength(20) phone: string;
+  /** Length and strength are checked by the password policy for friendlier messages. */
+  @IsString() @MaxLength(512) password: string;
+}
+
+export class CustomerLoginDto {
+  @IsEmail() @MaxLength(254) email: string;
+  @IsString() @MinLength(1) @MaxLength(512) password: string;
+}
+
+export class CustomerRefreshDto {
+  @IsString() @MinLength(20) @MaxLength(200) refreshToken: string;
+}
+
+export class UpdateMeDto {
+  @IsOptional() @IsString() @MinLength(2) @MaxLength(120) name?: string;
+  @IsOptional() @IsString() @MaxLength(20) phone?: string;
+}
