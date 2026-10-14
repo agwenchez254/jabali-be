@@ -9,7 +9,7 @@ export const TEST_URL = process.env.TEST_DATABASE_URL ?? 'postgresql://jabali:ja
 /** Boots the whole app on a random port against the test database. Env overrides apply before the app loads. */
 export async function bootApp(env: Record<string, string> = {}): Promise<{ app: NestExpressApplication; base: string }> {
   // Env is shared across e2e files in one process, so every default is set explicitly each time.
-  Object.assign(process.env, { DATABASE_URL: TEST_URL, ENABLE_SCHEDULER: 'false', RATE_LIMIT_ENABLED: 'true' }, env);
+  Object.assign(process.env, { DATABASE_URL: TEST_URL, ENABLE_SCHEDULER: 'false', RATE_LIMIT_ENABLED: 'true', SMTP_URL: '' }, env);
   const { AppModule } = await import('../../src/app.module');
   const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
   const app = mod.createNestApplication<NestExpressApplication>();

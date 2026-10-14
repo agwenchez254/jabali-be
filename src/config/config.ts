@@ -33,6 +33,15 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  // Email (SMTP). Empty SMTP_URL = log-only transport in development and test.
+  SMTP_URL: opt(z.string().regex(/^smtps?:\/\/\S+$/, 'SMTP_URL must start with smtp:// or smtps://')),
+  MAIL_FROM: z
+    .string()
+    .min(3)
+    .refine((v) => v.includes('@') && !/[\r\n]/.test(v), 'MAIL_FROM must be an address without line breaks')
+    .default('Jabali <no-reply@jabali.co.ke>'),
+  MAIL_REPLY_TO: opt(z.string().refine((v) => v.includes('@') && !/[\r\n]/.test(v), 'MAIL_REPLY_TO must be an address without line breaks')),
+  STORE_URL: z.string().url().default('http://localhost:5173'),
   // Number of reverse proxies in front of the API (so req.ip is the real client address).
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
   RATE_LIMIT_ENABLED: z
@@ -55,6 +64,7 @@ export type AppConfig = {
   enableScheduler: boolean;
   trustProxyHops: number;
   rateLimitEnabled: boolean;
+  mail: { smtpUrl?: string; from: string; replyTo?: string; storeUrl: string };
   mpesa: {
     env: 'sandbox' | 'production';
     consumerKey?: string;
@@ -88,6 +98,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const e = parsed.data;
   assertCorsOrigins(e.CORS_ORIGINS, e.NODE_ENV);
   if (e.NODE_ENV === 'production' && !e.RATE_LIMIT_ENABLED) throw new Error('RATE_LIMIT_ENABLED=false is not allowed in production');
+  if (e.NODE_ENV === 'production') {
+    if (!e.SMTP_URL) throw new Error('SMTP_URL is required in production so customer email is never silently dropped');
+    if (!e.STORE_URL.startsWith('https://')) throw new Error('STORE_URL must use https in production');
+  }
   return {
     nodeEnv: e.NODE_ENV,
     port: e.PORT,
@@ -102,6 +116,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     enableScheduler: e.ENABLE_SCHEDULER,
     trustProxyHops: e.TRUST_PROXY_HOPS,
     rateLimitEnabled: e.RATE_LIMIT_ENABLED,
+    mail: { smtpUrl: e.SMTP_URL || undefined, from: e.MAIL_FROM, replyTo: e.MAIL_REPLY_TO || undefined, storeUrl: e.STORE_URL.replace(/\/+$/, '') },
     mpesa: {
       env: e.MPESA_ENV,
       consumerKey: e.MPESA_CONSUMER_KEY || undefined,

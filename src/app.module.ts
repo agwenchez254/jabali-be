@@ -14,6 +14,7 @@ import { ContentModule } from './content/content.module';
 import { DeliveryModule } from './delivery/delivery.module';
 import { HealthModule } from './health/health.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { MailModule } from './mail/mail.module';
 import { MediaModule } from './media/media.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -30,6 +31,7 @@ import { StoreEventsModule } from './store-events/store-events.module';
     StoreEventsModule,
     RateLimitModule,
     SecurityLogModule,
+    MailModule,
     AuthModule,
     CustomerAuthModule,
     StaffModule,
