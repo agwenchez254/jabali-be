@@ -23,7 +23,7 @@ const DUMMY_HASH = '$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHRzb21lc2FsdA$Nl8bY2
 const HOUR_MS = 3_600_000;
 
 type Meta = { ip?: string; userAgent?: string };
-type AccountWithCustomer = { id: string; email: string; customer: { id: string; name: string; phone: string } };
+type AccountWithCustomer = { id: string; email: string; displayName: string; customer: { id: string; name: string; phone: string } };
 
 export interface CustomerView {
   id: string;
@@ -39,7 +39,10 @@ export interface VerificationStarted {
   resendAfterSeconds: number;
 }
 
-const view = (a: AccountWithCustomer): CustomerView => ({ id: a.customer.id, name: a.customer.name, email: a.email, phone: a.customer.phone });
+/** The account's own name wins: a linked guest record's name (set by someone else) is never shown. */
+const nameOf = (a: { displayName: string; customer: { name: string } }): string => a.displayName || a.customer.name;
+
+const view = (a: AccountWithCustomer): CustomerView => ({ id: a.customer.id, name: nameOf(a), email: a.email, phone: a.customer.phone });
 
 /** Which unique constraint a P2002 error hit, as the API error code. */
 function conflictCode(e: unknown): 'email_taken' | 'phone_taken' {
@@ -99,7 +102,7 @@ export class CustomerAuthService {
         // A guest customer with this phone (earlier anonymous orders) is linked so they keep their history, but its
         // details are left untouched until the email is verified.
         const customer = existing ?? (await tx.customer.create({ data: { phone, name, email } }));
-        const account = await tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash }, include: { customer: true } });
+        const account = await tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash, displayName: name }, include: { customer: true } });
         return { kind: 'created' as const, account };
       });
       if (outcome.kind === 'pending') {
@@ -112,7 +115,7 @@ export class CustomerAuthService {
         }
       }
       if (outcome.kind === 'created') this.security.log('register', { accountId: outcome.account.id, email, ip: meta.ip });
-      await this.sendCode(outcome.account, outcome.account.customer.name);
+      await this.sendCode(outcome.account, nameOf(outcome.account));
       return this.started(email);
     } catch (e) {
       if (isUniqueViolation(e)) {
@@ -156,7 +159,7 @@ export class CustomerAuthService {
   async resend(emailRaw: string): Promise<void> {
     const account = await this.prisma.customerAccount.findUnique({ where: { email: emailRaw.trim().toLowerCase() }, include: { customer: true } });
     if (!account || account.emailVerifiedAt) return;
-    await this.sendCode(account, account.customer.name);
+    await this.sendCode(account, nameOf(account));
   }
 
   /** Confirms the emailed code, activates the account, issues the first tokens and sends the welcome email. */
@@ -189,7 +192,7 @@ export class CustomerAuthService {
     });
     if (claimed.count !== 1) throw invalid();
     this.security.log('email_verified', { accountId: account.id, ip: meta.ip });
-    this.mail.sendWelcome(account.email, account.customer.name);
+    this.mail.sendWelcome(account.email, nameOf(account));
     const tokens = await this.issue(account, randomUUID(), meta);
     return { customer: view(account), tokens };
   }
@@ -261,26 +264,18 @@ export class CustomerAuthService {
     return view(account);
   }
 
+  /**
+   * Only the account's own display name can be edited. The Customer record behind it may be a guest record created
+   * by earlier orders (and shown to staff), so the account never writes to it, and the phone cannot be changed
+   * until it can be verified.
+   */
   async updateMe(accountId: string, dto: UpdateMeDto): Promise<CustomerView> {
-    const account = await this.prisma.customerAccount.findUniqueOrThrow({ where: { id: accountId } });
-    const data: { name?: string; phone?: string } = {};
-    if (dto.name !== undefined) data.name = dto.name.trim();
-    if (dto.phone !== undefined) {
-      const phone = normalizePhone(dto.phone);
-      if (!phone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'invalid_phone', 'Enter a valid Kenyan mobile number');
-      data.phone = phone;
-    }
-    try {
-      await this.prisma.customer.update({ where: { id: account.customerId }, data });
-    } catch (e) {
-      if (isUniqueViolation(e)) throw new DomainError(HttpStatus.CONFLICT, 'phone_taken', CONFLICT_MESSAGE.phone_taken);
-      throw e;
-    }
+    if (dto.name !== undefined) await this.prisma.customerAccount.update({ where: { id: accountId }, data: { displayName: dto.name.trim() } });
     return this.me(accountId);
   }
 
   private async issue(account: AccountWithCustomer, familyId: string, meta: Meta, replacesId?: string): Promise<TokenPair> {
-    const payload: CustomerTokenPayload = { sub: account.id, typ: 'customer', cid: account.customer.id, email: account.email, name: account.customer.name };
+    const payload: CustomerTokenPayload = { sub: account.id, typ: 'customer', cid: account.customer.id, email: account.email, name: nameOf(account) };
     const accessToken = await this.jwt.signAsync(payload);
     const refreshToken = randomBytes(48).toString('base64url');
     const refreshExpiresAt = new Date(Date.now() + this.cfg.refreshTtlDays * 86_400_000);

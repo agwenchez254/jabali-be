@@ -593,6 +593,8 @@ model CustomerAccount {
   customerId   String        @unique @db.Uuid
   email        String        @unique
   passwordHash String
+  /** The name the account holder gave. Kept separate from Customer.name so a linked guest record is never exposed or edited. */
+  displayName  String        @default("")
   status       AccountStatus @default(active)
   failedLogins Int           @default(0)
   lockedUntil  DateTime?

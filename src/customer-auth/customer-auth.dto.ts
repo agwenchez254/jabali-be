@@ -20,7 +20,6 @@ export class CustomerRefreshDto {
 
 export class UpdateMeDto {
   @IsOptional() @IsString() @MinLength(2) @MaxLength(120) name?: string;
-  @IsOptional() @IsString() @MaxLength(20) phone?: string;
 }
 
 export class VerifyEmailDto {

@@ -5,6 +5,7 @@ import { CustomerAuthUser } from '../common/auth/auth.types';
 import { CurrentCustomer } from '../common/auth/customer.decorators';
 import { CustomerAuthGuard } from '../common/auth/customer.guard';
 import { DomainError } from '../common/problem-details.filter';
+import { MailService } from '../mail/mail.service';
 import { CheckoutDto } from '../orders/orders.dto';
 import { OrdersModule } from '../orders/orders.module';
 import { OrdersService } from '../orders/orders.service';
@@ -21,6 +22,7 @@ export class StoreCheckoutController {
   constructor(
     private readonly orders: OrdersService,
     private readonly payments: PaymentsService,
+    private readonly mail: MailService,
   ) {}
 
   /**
@@ -40,6 +42,9 @@ export class StoreCheckoutController {
     }
     const { order, created } = await this.orders.checkout(dto, key, customer.customerId);
     res.status(created ? HttpStatus.CREATED : HttpStatus.OK);
+    // Only for a newly created order: an idempotent replay must not email the receipt again.
+    // The greeting uses the account's own name, never the name stored on a linked guest record.
+    if (created) this.mail.sendOrderConfirmation(customer.email, { ...order, customer: { ...order.customer, name: customer.name } });
     if (!created) return { order, payment: null, idempotentReplay: true };
     const payment = await this.payments.initiate(order.id).catch(() => null);
     return { order, payment, idempotentReplay: false };

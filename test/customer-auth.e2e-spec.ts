@@ -267,6 +267,27 @@ describe('customer auth', () => {
       expect(await prisma.customerAccount.count({ where: { email } })).toBe(1);
     });
 
+    it('never shows an existing guest customer\'s details to whoever claims the phone, and never lets the account edit them', async () => {
+      const n = uniq();
+      const guest = await prisma.customer.create({ data: { name: 'Guest Buyer', phone: `+2547${String(50000000 + n).slice(-8)}`, email: 'guest.private@example.com' } });
+      const s = await registerVerified(app, base, newAccount({ phone: `0${guest.phone.slice(4)}`, name: 'Someone Else' }));
+      expect(s.customer.name).toBe('Someone Else');
+      const me = await fetch(`${base}/store/me`, { headers: authed(s.accessToken) });
+      expect(await me.json()).toMatchObject({ name: 'Someone Else', phone: guest.phone });
+      expect(JSON.stringify(await prisma.customerAccount.findUnique({ where: { email: s.customer.email } }))).not.toContain('Guest Buyer');
+      // editing the profile changes the account's display name, not the guest record that staff see on old orders
+      const patched = await fetch(`${base}/store/me`, json({ name: 'Renamed' }, authed(s.accessToken), 'PATCH'));
+      expect(((await patched.json()) as { name: string }).name).toBe('Renamed');
+      const after = await prisma.customer.findUniqueOrThrow({ where: { id: guest.id } });
+      expect(after).toMatchObject({ name: 'Guest Buyer', email: 'guest.private@example.com', phone: guest.phone });
+    });
+
+    it('does not allow the phone number to be changed through the profile', async () => {
+      const s = await registerVerified(app, base, newAccount());
+      const r = await fetch(`${base}/store/me`, json({ phone: '0711999888' }, authed(s.accessToken), 'PATCH'));
+      expect(r.status).toBe(400);
+    });
+
     it('claims an existing guest customer by phone once the email is verified', async () => {
       const n = uniq();
       const guest = await prisma.customer.create({ data: { name: 'Guest Buyer', phone: `+2547${String(30000000 + n).slice(-8)}` } });
