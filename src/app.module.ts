@@ -17,12 +17,14 @@ import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.service';
 import { PromotionsModule } from './promotions/promotions.module';
 import { StaffModule } from './staff/staff.module';
+import { StoreEventsModule } from './store-events/store-events.module';
 
 @Module({
   imports: [
     ConfigModule,
     PrismaModule,
     CacheModule,
+    StoreEventsModule,
     AuthModule,
     StaffModule,
     CatalogueModule,
