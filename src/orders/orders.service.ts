@@ -98,16 +98,13 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ------------------------------------------------------------------ checkout
-  async checkout(dto: CheckoutDto, idempotencyKey: string): Promise<{ order: ReturnType<OrdersService['view']>; created: boolean }> {
+  async checkout(dto: CheckoutDto, idempotencyKey: string, customerId: string): Promise<{ order: ReturnType<OrdersService['view']>; created: boolean }> {
     const existing = await this.prisma.order.findUnique({ where: { idempotencyKey }, include: orderInclude });
-    if (existing) return { order: this.view(existing), created: false };
-
-    const phone = normalizePhone(dto.customer.phone);
-    if (!phone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'invalid_phone', 'Enter a valid Kenyan mobile number');
+    if (existing) return { order: this.ownedReplay(existing, customerId), created: false };
 
     try {
       const id = await this.prisma.$transaction(
-        async (tx) => this.createOrderTx(tx, dto, phone, idempotencyKey),
+        async (tx) => this.createOrderTx(tx, dto, customerId, idempotencyKey),
         { maxWait: 10_000, timeout: 20_000 },
       );
       void this.cache.invalidate('store:products').then(() => this.events.emit(['Product', 'Home']));
@@ -116,13 +113,23 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
     } catch (e) {
       if (isUniqueViolation(e)) {
         const dup = await this.prisma.order.findUnique({ where: { idempotencyKey }, include: orderInclude });
-        if (dup) return { order: this.view(dup), created: false };
+        if (dup) return { order: this.ownedReplay(dup, customerId), created: false };
       }
       throw e;
     }
   }
 
-  private async createOrderTx(tx: Prisma.TransactionClient, dto: CheckoutDto, phone: string, idempotencyKey: string): Promise<string> {
+  /** A replayed Idempotency-Key may only return the caller's own order. */
+  private ownedReplay(order: OrderFull, customerId: string) {
+    if (order.customerId !== customerId) {
+      throw new DomainError(HttpStatus.CONFLICT, 'idempotency_key_conflict', 'This Idempotency-Key was already used. Send a new one.');
+    }
+    return this.view(order);
+  }
+
+  private async createOrderTx(tx: Prisma.TransactionClient, dto: CheckoutDto, customerId: string, idempotencyKey: string): Promise<string> {
+    const customer = await tx.customer.findUniqueOrThrow({ where: { id: customerId } });
+    const phone = customer.phone;
     // 1. lock inventory rows in a consistent order, so concurrent buyers serialise per variant
     await lockInventory(tx, dto.lines.map((l) => l.variantId));
 
@@ -147,11 +154,6 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
     }
 
     const pickupAddress = await tx.siteSetting.findUnique({ where: { key: 'pickupAddress' } });
-    const customer = await tx.customer.upsert({
-      where: { phone },
-      update: { name: dto.customer.name, email: dto.customer.email ?? undefined },
-      create: { phone, name: dto.customer.name, email: dto.customer.email },
-    });
     const byLine = new Map(pricing.lines.map((l) => [l.lineId, l]));
     const order = await tx.order.create({
       data: {

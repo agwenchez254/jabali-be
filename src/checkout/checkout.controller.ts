@@ -1,6 +1,9 @@
-import { Body, Controller, Headers, HttpStatus, Module, Post, Res } from '@nestjs/common';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Headers, HttpStatus, Module, Post, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { CustomerAuthUser } from '../common/auth/auth.types';
+import { CurrentCustomer } from '../common/auth/customer.decorators';
+import { CustomerAuthGuard } from '../common/auth/customer.guard';
 import { DomainError } from '../common/problem-details.filter';
 import { CheckoutDto } from '../orders/orders.dto';
 import { OrdersModule } from '../orders/orders.module';
@@ -11,6 +14,8 @@ import { PaymentsService } from '../payments/payments.service';
 const KEY_RE = /^[A-Za-z0-9_\-:.]{8,100}$/;
 
 @ApiTags('store')
+@ApiBearerAuth()
+@UseGuards(CustomerAuthGuard)
 @Controller('store/orders')
 export class StoreCheckoutController {
   constructor(
@@ -24,11 +29,16 @@ export class StoreCheckoutController {
    */
   @Post()
   @ApiHeader({ name: 'Idempotency-Key', required: true, description: 'Client-generated unique key (8-100 chars). Reuse it when retrying.' })
-  async checkout(@Body() dto: CheckoutDto, @Headers('idempotency-key') key: string | undefined, @Res({ passthrough: true }) res: Response) {
+  async checkout(
+    @Body() dto: CheckoutDto,
+    @CurrentCustomer() customer: CustomerAuthUser,
+    @Headers('idempotency-key') key: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     if (!key || !KEY_RE.test(key)) {
       throw new DomainError(HttpStatus.BAD_REQUEST, 'idempotency_key_required', 'Send an Idempotency-Key header (8-100 chars: letters, digits, _ - : .)');
     }
-    const { order, created } = await this.orders.checkout(dto, key);
+    const { order, created } = await this.orders.checkout(dto, key, customer.customerId);
     res.status(created ? HttpStatus.CREATED : HttpStatus.OK);
     if (!created) return { order, payment: null, idempotentReplay: true };
     const payment = await this.payments.initiate(order.id).catch(() => null);

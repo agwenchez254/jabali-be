@@ -26,7 +26,8 @@ export class CheckoutCustomerDto {
 }
 
 export class CheckoutDto {
-  @ValidateNested() @Type(() => CheckoutCustomerDto) customer: CheckoutCustomerDto;
+  /** Ignored: the order always belongs to the authenticated customer. Kept optional for older clients. */
+  @IsOptional() @ValidateNested() @Type(() => CheckoutCustomerDto) customer?: CheckoutCustomerDto;
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => QuoteLineDto)
   lines: QuoteLineDto[];
   @IsOptional() @IsString() @MaxLength(40) promoCode?: string;
