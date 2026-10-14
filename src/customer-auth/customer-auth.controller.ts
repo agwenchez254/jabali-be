@@ -5,6 +5,7 @@ import { TokenPair } from '../auth/models';
 import { CustomerAuthUser } from '../common/auth/auth.types';
 import { CurrentCustomer } from '../common/auth/customer.decorators';
 import { CustomerAuthGuard } from '../common/auth/customer.guard';
+import { perMinute, RateLimit } from '../common/rate-limit/rate-limit.guard';
 import { CustomerLoginDto, CustomerRefreshDto, RegisterDto, UpdateMeDto } from './customer-auth.dto';
 import { CustomerAuthService, CustomerView } from './customer-auth.service';
 
@@ -24,6 +25,7 @@ export class CustomerAuthController {
   constructor(private readonly auth: CustomerAuthService) {}
 
   @Post('register')
+  @RateLimit(perMinute('register', 5, 'ip'))
   async register(@Body() dto: RegisterDto, @Req() req: Request) {
     const { customer, tokens } = await this.auth.register(dto, meta(req));
     return body(customer, tokens);
@@ -31,6 +33,7 @@ export class CustomerAuthController {
 
   @Post('login')
   @HttpCode(200)
+  @RateLimit(perMinute('login', 10, 'ip'), perMinute('login-email', 5, 'email'))
   async login(@Body() dto: CustomerLoginDto, @Req() req: Request) {
     const { customer, tokens } = await this.auth.login(dto.email, dto.password, meta(req));
     return body(customer, tokens);
@@ -38,6 +41,7 @@ export class CustomerAuthController {
 
   @Post('refresh')
   @HttpCode(200)
+  @RateLimit(perMinute('refresh', 30, 'ip'))
   async refresh(@Body() dto: CustomerRefreshDto, @Req() req: Request) {
     const { customer, tokens } = await this.auth.refresh(dto.refreshToken, meta(req));
     return body(customer, tokens);
