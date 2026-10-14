@@ -1,0 +1,2307 @@
+{
+ "categories": [
+  {
+   "gender": "men",
+   "slug": "suits",
+   "label": "Suits & Blazers",
+   "tagline": "Weddings, boardrooms, Sundays",
+   "image": "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 0
+  },
+  {
+   "gender": "men",
+   "slug": "shirts",
+   "label": "Shirts",
+   "tagline": "Oxford, linen, poplin",
+   "image": "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 1
+  },
+  {
+   "gender": "men",
+   "slug": "shoes",
+   "label": "Shoes",
+   "tagline": "Leather and sneakers",
+   "image": "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 2
+  },
+  {
+   "gender": "men",
+   "slug": "kaunda",
+   "label": "Kaunda",
+   "tagline": "The classic, reworked",
+   "image": "https://images.unsplash.com/photo-1507680434567-5739c80be1ac?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 3
+  },
+  {
+   "gender": "men",
+   "slug": "trousers",
+   "label": "Trousers",
+   "tagline": "Chinos, wool, denim",
+   "image": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 4
+  },
+  {
+   "gender": "men",
+   "slug": "jackets",
+   "label": "Jackets",
+   "tagline": "Bombers and leather",
+   "image": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 5
+  },
+  {
+   "gender": "men",
+   "slug": "tshirts",
+   "label": "T-Shirts & Polos",
+   "tagline": "Heavy cotton basics",
+   "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 6
+  },
+  {
+   "gender": "men",
+   "slug": "accessories",
+   "label": "Accessories",
+   "tagline": "Watches, ties, wallets",
+   "image": "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 7
+  },
+  {
+   "gender": "women",
+   "slug": "dresses",
+   "label": "Dresses",
+   "tagline": "Day, evening and everything between",
+   "image": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 0
+  },
+  {
+   "gender": "women",
+   "slug": "tops",
+   "label": "Tops",
+   "tagline": "Blouses, shirts and tees",
+   "image": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 1
+  },
+  {
+   "gender": "women",
+   "slug": "knitwear",
+   "label": "Knitwear",
+   "tagline": "Soft layers",
+   "image": "https://images.unsplash.com/photo-1475180098004-ca77a66827be?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 2
+  },
+  {
+   "gender": "women",
+   "slug": "jackets",
+   "label": "Coats & Jackets",
+   "tagline": "Wool, denim, tailoring",
+   "image": "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 3
+  },
+  {
+   "gender": "women",
+   "slug": "trousers",
+   "label": "Trousers & Jeans",
+   "tagline": "Wide-leg to skinny",
+   "image": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 4
+  },
+  {
+   "gender": "women",
+   "slug": "shoes",
+   "label": "Shoes",
+   "tagline": "Heels and flats",
+   "image": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 5
+  },
+  {
+   "gender": "women",
+   "slug": "accessories",
+   "label": "Bags & Jewellery",
+   "tagline": "Finishing touches",
+   "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1000&q=75&auto=format&fit=crop",
+   "sortOrder": 6
+  }
+ ],
+ "products": [
+  {
+   "slug": "oxford-button-down",
+   "name": "Oxford Button-Down",
+   "gender": "men",
+   "category": "shirts",
+   "price": 3200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    },
+    {
+     "name": "Sky",
+     "hex": "#bcd1e6"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "White": [
+     "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Sky": [
+     "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.1,
+   "sold": 198,
+   "stock": 3,
+   "blurb": "Brushed cotton Oxford with a soft collar roll. Works open or tucked."
+  },
+  {
+   "slug": "linen-camp-shirt",
+   "name": "Linen Camp Shirt",
+   "gender": "men",
+   "category": "shirts",
+   "price": 2800,
+   "compareAt": 3400,
+   "colours": [
+    {
+     "name": "Sky",
+     "hex": "#bcd1e6"
+    },
+    {
+     "name": "Sand",
+     "hex": "#cdb895"
+    },
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Sky": [
+     "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.2,
+   "sold": 91,
+   "stock": 10,
+   "blurb": "Breathable linen for Mombasa afternoons and Nairobi weekends."
+  },
+  {
+   "slug": "slim-poplin-shirt",
+   "name": "Slim Poplin Shirt",
+   "gender": "men",
+   "category": "shirts",
+   "price": 2400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Sky",
+     "hex": "#bcd1e6"
+    },
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Sky": [
+     "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "White": [
+     "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.3,
+   "sold": 144,
+   "stock": 17,
+   "blurb": "A crisp office staple cut close through the body."
+  },
+  {
+   "slug": "check-flannel-shirt",
+   "name": "Check Flannel Shirt",
+   "gender": "men",
+   "category": "shirts",
+   "price": 3600,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Burgundy",
+     "hex": "#6b1f2a"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Olive",
+     "hex": "#5b6140"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.4,
+   "sold": 197,
+   "stock": 6,
+   "blurb": "Heavy brushed flannel for cold Nanyuki mornings."
+  },
+  {
+   "slug": "pleated-chino",
+   "name": "Pleated Chino",
+   "gender": "men",
+   "category": "trousers",
+   "price": 3800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Sand",
+     "hex": "#cdb895"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Olive",
+     "hex": "#5b6140"
+    }
+   ],
+   "sizes": [
+    "30",
+    "32",
+    "34",
+    "36",
+    "38",
+    "40"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.5,
+   "sold": 200,
+   "stock": 13,
+   "blurb": "Single pleat, tapered leg, and stretch where you need it."
+  },
+  {
+   "slug": "tailored-wool-trouser",
+   "name": "Tailored Wool Trouser",
+   "gender": "men",
+   "category": "trousers",
+   "price": 5400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Charcoal",
+     "hex": "#2f3237"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Slate",
+     "hex": "#7a808a"
+    }
+   ],
+   "sizes": [
+    "30",
+    "32",
+    "34",
+    "36",
+    "38",
+    "40"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1618886614638-80e3c103d31a?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.6,
+   "sold": 93,
+   "stock": 20,
+   "blurb": "Wool blend with a clean drape. Hemmed free in Nairobi."
+  },
+  {
+   "slug": "straight-dark-jean",
+   "name": "Straight Dark Jean",
+   "gender": "men",
+   "category": "trousers",
+   "price": 4200,
+   "compareAt": 4900,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "30",
+    "32",
+    "34",
+    "36",
+    "38",
+    "40"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Onyx": [
+     "https://images.unsplash.com/photo-1542272604-787c3835535d?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Navy": [
+     "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.7,
+   "sold": 146,
+   "stock": 9,
+   "blurb": "Rigid selvedge-look denim that fades the way you wear it."
+  },
+  {
+   "slug": "slim-fit-jean",
+   "name": "Slim Fit Jean",
+   "gender": "men",
+   "category": "trousers",
+   "price": 3500,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Slate",
+     "hex": "#7a808a"
+    }
+   ],
+   "sizes": [
+    "30",
+    "32",
+    "34",
+    "36",
+    "38",
+    "40"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1542272604-787c3835535d?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Onyx": [
+     "https://images.unsplash.com/photo-1542272604-787c3835535d?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Navy": [
+     "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.8,
+   "sold": 199,
+   "stock": 16,
+   "blurb": "Mid-weight stretch denim with a slim, easy taper."
+  },
+  {
+   "slug": "two-piece-charcoal-suit",
+   "name": "Two-Piece Charcoal Suit",
+   "gender": "men",
+   "category": "suits",
+   "price": 18500,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Charcoal",
+     "hex": "#2f3237"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Navy": [
+     "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Charcoal": [
+     "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1618886614638-80e3c103d31a?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.9,
+   "sold": 612,
+   "stock": 5,
+   "blurb": "Half-canvassed jacket with matching trousers. Alterations included."
+  },
+  {
+   "slug": "navy-single-breasted-blazer",
+   "name": "Navy Single-Breasted Blazer",
+   "gender": "men",
+   "category": "suits",
+   "price": 9800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Charcoal",
+     "hex": "#2f3237"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.1,
+   "sold": 95,
+   "stock": 12,
+   "blurb": "Two buttons, notch lapel, real horn-effect buttons."
+  },
+  {
+   "slug": "windowpane-blazer",
+   "name": "Windowpane Blazer",
+   "gender": "men",
+   "category": "suits",
+   "price": 11200,
+   "compareAt": 12800,
+   "colours": [
+    {
+     "name": "Slate",
+     "hex": "#7a808a"
+    },
+    {
+     "name": "Forest",
+     "hex": "#24493a"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1600091166971-7f9faad6c1e2?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1598808503746-f34c53b9323e?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.2,
+   "sold": 148,
+   "stock": 19,
+   "blurb": "A textured check that photographs well in daylight."
+  },
+  {
+   "slug": "three-piece-wedding-suit",
+   "name": "Three-Piece Wedding Suit",
+   "gender": "men",
+   "category": "suits",
+   "price": 24500,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Forest",
+     "hex": "#24493a"
+    },
+    {
+     "name": "Charcoal",
+     "hex": "#2f3237"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Navy": [
+     "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Forest": [
+     "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.3,
+   "sold": 201,
+   "stock": 8,
+   "blurb": "Jacket, waistcoat and trousers. Book a fitting before the big day."
+  },
+  {
+   "slug": "leather-oxford",
+   "name": "Leather Oxford",
+   "gender": "men",
+   "category": "shoes",
+   "price": 7800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Brown",
+     "hex": "#5a3a26"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.4,
+   "sold": 204,
+   "stock": 15,
+   "blurb": "Full-grain leather, stitched sole, a shine that lasts."
+  },
+  {
+   "slug": "double-monk-strap",
+   "name": "Double Monk Strap",
+   "gender": "men",
+   "category": "shoes",
+   "price": 8900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Brown",
+     "hex": "#5a3a26"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.5,
+   "sold": 97,
+   "stock": 4,
+   "blurb": "Two buckles, a clean last, and a sole built for pavements."
+  },
+  {
+   "slug": "minimal-leather-sneaker",
+   "name": "Minimal Leather Sneaker",
+   "gender": "men",
+   "category": "shoes",
+   "price": 5600,
+   "compareAt": 6500,
+   "colours": [
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "White": [
+     "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Onyx": [
+     "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.6,
+   "sold": 150,
+   "stock": 11,
+   "blurb": "Clean court sneaker that goes with a suit or jeans."
+  },
+  {
+   "slug": "leather-derby",
+   "name": "Leather Derby",
+   "gender": "men",
+   "category": "shoes",
+   "price": 6900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Brown",
+     "hex": "#5a3a26"
+    },
+    {
+     "name": "Tan",
+     "hex": "#a8743e"
+    }
+   ],
+   "sizes": [
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.7,
+   "sold": 203,
+   "stock": 18,
+   "blurb": "Open-lacing derby, polished for long Friday lunches."
+  },
+  {
+   "slug": "heavy-cotton-tee",
+   "name": "Heavy Cotton Tee",
+   "gender": "men",
+   "category": "tshirts",
+   "price": 1500,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Olive",
+     "hex": "#5b6140"
+    },
+    {
+     "name": "Sand",
+     "hex": "#cdb895"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "White": [
+     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Onyx": [
+     "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1000&q=75&auto=format&fit=crop"
+    ],
+    "Olive": [
+     "https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.8,
+   "sold": 206,
+   "stock": 7,
+   "blurb": "240gsm cotton that holds its shape wash after wash."
+  },
+  {
+   "slug": "piqu-polo",
+   "name": "Piqué Polo",
+   "gender": "men",
+   "category": "tshirts",
+   "price": 2200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    },
+    {
+     "name": "Burgundy",
+     "hex": "#6b1f2a"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.9,
+   "sold": 99,
+   "stock": 14,
+   "blurb": "Knit collar, two-button placket, a smart weekend default."
+  },
+  {
+   "slug": "black-crew-tee",
+   "name": "Black Crew Tee",
+   "gender": "men",
+   "category": "tshirts",
+   "price": 1800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Slate",
+     "hex": "#7a808a"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {
+    "Onyx": [
+     "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=1000&q=75&auto=format&fit=crop",
+     "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1000&q=75&auto=format&fit=crop"
+    ]
+   },
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.1,
+   "sold": 152,
+   "stock": 3,
+   "blurb": "A heavyweight black tee that sits right under a jacket."
+  },
+  {
+   "slug": "rust-bomber",
+   "name": "Rust Bomber",
+   "gender": "men",
+   "category": "jackets",
+   "price": 6200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Tan",
+     "hex": "#a8743e"
+    },
+    {
+     "name": "Olive",
+     "hex": "#5b6140"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.2,
+   "sold": 205,
+   "stock": 10,
+   "blurb": "Light bomber with ribbed trims and a zip front."
+  },
+  {
+   "slug": "leather-biker-jacket",
+   "name": "Leather Biker Jacket",
+   "gender": "men",
+   "category": "jackets",
+   "price": 14400,
+   "compareAt": 16200,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Brown",
+     "hex": "#5a3a26"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.3,
+   "sold": 48,
+   "stock": 17,
+   "blurb": "Soft-grain leather with a quilted shoulder and zipped cuffs."
+  },
+  {
+   "slug": "everyday-overshirt",
+   "name": "Everyday Overshirt",
+   "gender": "men",
+   "category": "jackets",
+   "price": 5800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Olive",
+     "hex": "#5b6140"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519764622345-23439dd774f7?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.4,
+   "sold": 101,
+   "stock": 6,
+   "blurb": "A shirt-weight jacket for the walk between meetings."
+  },
+  {
+   "slug": "woven-silk-tie",
+   "name": "Woven Silk Tie",
+   "gender": "men",
+   "category": "accessories",
+   "price": 1400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Burgundy",
+     "hex": "#6b1f2a"
+    },
+    {
+     "name": "Charcoal",
+     "hex": "#2f3237"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1589756823695-278bc923f962?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.5,
+   "sold": 154,
+   "stock": 13,
+   "blurb": "7cm blade, hand-rolled edges."
+  },
+  {
+   "slug": "bifold-leather-wallet",
+   "name": "Bifold Leather Wallet",
+   "gender": "men",
+   "category": "accessories",
+   "price": 2400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Brown",
+     "hex": "#5a3a26"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.6,
+   "sold": 207,
+   "stock": 20,
+   "blurb": "Six card slots, a coin pocket, and room for notes."
+  },
+  {
+   "slug": "two-tone-dress-watch",
+   "name": "Two-Tone Dress Watch",
+   "gender": "men",
+   "category": "accessories",
+   "price": 9800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Steel",
+     "hex": "#9aa0a6"
+    },
+    {
+     "name": "Tan",
+     "hex": "#a8743e"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1620625515032-6ed0c1790c75?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1507680434567-5739c80be1ac?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.7,
+   "sold": 210,
+   "stock": 9,
+   "blurb": "Steel case and bracelet, quartz movement, water resistant."
+  },
+  {
+   "slug": "chronograph-watch",
+   "name": "Chronograph Watch",
+   "gender": "men",
+   "category": "accessories",
+   "price": 14500,
+   "compareAt": 16900,
+   "colours": [
+    {
+     "name": "Steel",
+     "hex": "#9aa0a6"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.8,
+   "sold": 103,
+   "stock": 16,
+   "blurb": "Three sub-dials, a rotating bezel and a sapphire-effect crystal."
+  },
+  {
+   "slug": "everyday-backpack",
+   "name": "Everyday Backpack",
+   "gender": "men",
+   "category": "accessories",
+   "price": 4800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.9,
+   "sold": 156,
+   "stock": 5,
+   "blurb": "Padded laptop sleeve, water-resistant fabric, one tidy front pocket."
+  },
+  {
+   "slug": "kaunda-suit-set",
+   "name": "Kaunda Suit Set",
+   "gender": "men",
+   "category": "kaunda",
+   "price": 12500,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Olive",
+     "hex": "#5b6140"
+    },
+    {
+     "name": "Charcoal",
+     "hex": "#2f3237"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1507680434567-5739c80be1ac?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519764622345-23439dd774f7?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.1,
+   "sold": 369,
+   "stock": 12,
+   "blurb": "Jacket and trousers in a breathable twill, finished by hand."
+  },
+  {
+   "slug": "kaunda-shirt",
+   "name": "Kaunda Shirt",
+   "gender": "men",
+   "category": "kaunda",
+   "price": 3900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "White",
+     "hex": "#f4f1ec"
+    },
+    {
+     "name": "Sand",
+     "hex": "#cdb895"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    }
+   ],
+   "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1519764622345-23439dd774f7?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1507680434567-5739c80be1ac?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.2,
+   "sold": 52,
+   "stock": 19,
+   "blurb": "Mandarin collar and a patch pocket, ready for any occasion."
+  },
+  {
+   "slug": "floral-wrap-dress",
+   "name": "Floral Wrap Dress",
+   "gender": "women",
+   "category": "dresses",
+   "price": 4800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    },
+    {
+     "name": "Rose",
+     "hex": "#b5495b"
+    },
+    {
+     "name": "Sage",
+     "hex": "#8ea58e"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.3,
+   "sold": 540,
+   "stock": 8,
+   "blurb": "A fluid wrap with a tie waist that moves well from brunch to the evening."
+  },
+  {
+   "slug": "denim-shirt-dress",
+   "name": "Denim Shirt Dress",
+   "gender": "women",
+   "category": "dresses",
+   "price": 4200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Denim",
+     "hex": "#5f7fa6"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.4,
+   "sold": 380,
+   "stock": 15,
+   "blurb": "Button-through denim with a flared skirt. Dress it up with heels or down with sneakers."
+  },
+  {
+   "slug": "crimson-maxi-dress",
+   "name": "Crimson Maxi Dress",
+   "gender": "women",
+   "category": "dresses",
+   "price": 7800,
+   "compareAt": 9200,
+   "colours": [
+    {
+     "name": "Crimson",
+     "hex": "#b3202d"
+    },
+    {
+     "name": "Plum",
+     "hex": "#5a2a4a"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.5,
+   "sold": 211,
+   "stock": 4,
+   "blurb": "A full skirt that catches the light. Made for weddings and long evenings."
+  },
+  {
+   "slug": "plum-off-shoulder-dress",
+   "name": "Plum Off-Shoulder Dress",
+   "gender": "women",
+   "category": "dresses",
+   "price": 6900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Plum",
+     "hex": "#5a2a4a"
+    },
+    {
+     "name": "Rose",
+     "hex": "#b5495b"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.6,
+   "sold": 54,
+   "stock": 11,
+   "blurb": "Stretch crepe with a sculpted neckline and a clean, fitted line."
+  },
+  {
+   "slug": "pearl-button-blouse",
+   "name": "Pearl-Button Blouse",
+   "gender": "women",
+   "category": "tops",
+   "price": 3200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    },
+    {
+     "name": "Blush",
+     "hex": "#e3b7b0"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.7,
+   "sold": 107,
+   "stock": 18,
+   "blurb": "A relaxed cotton blouse with pearl-effect buttons. Wear it open over a tee."
+  },
+  {
+   "slug": "sage-cotton-shirt",
+   "name": "Sage Cotton Shirt",
+   "gender": "women",
+   "category": "tops",
+   "price": 2800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Sage",
+     "hex": "#8ea58e"
+    },
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.8,
+   "sold": 160,
+   "stock": 7,
+   "blurb": "Washed cotton poplin in a soft, grown-in green."
+  },
+  {
+   "slug": "roll-sleeve-tee",
+   "name": "Roll-Sleeve Tee",
+   "gender": "women",
+   "category": "tops",
+   "price": 1600,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.9,
+   "sold": 213,
+   "stock": 14,
+   "blurb": "A heavy cotton tee with a slightly boxy cut and rolled sleeves."
+  },
+  {
+   "slug": "weekend-graphic-tee",
+   "name": "Weekend Graphic Tee",
+   "gender": "women",
+   "category": "tops",
+   "price": 1800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1582418702059-97ebafb35d09?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.1,
+   "sold": 56,
+   "stock": 3,
+   "blurb": "Soft jersey with a front print. Goes with every pair of jeans we make."
+  },
+  {
+   "slug": "fringe-knit-poncho",
+   "name": "Fringe Knit Poncho",
+   "gender": "women",
+   "category": "knitwear",
+   "price": 3900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    },
+    {
+     "name": "Camel",
+     "hex": "#b58b5a"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.2,
+   "sold": 290,
+   "stock": 10,
+   "blurb": "An open-weave knit with fringed hems. One size, easy to layer."
+  },
+  {
+   "slug": "chevron-knit-sweater",
+   "name": "Chevron Knit Sweater",
+   "gender": "women",
+   "category": "knitwear",
+   "price": 4400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Camel",
+     "hex": "#b58b5a"
+    },
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1475180098004-ca77a66827be?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.3,
+   "sold": 162,
+   "stock": 17,
+   "blurb": "A chunky zig-zag knit that keeps out the Nairobi evening chill."
+  },
+  {
+   "slug": "soft-rib-cardigan",
+   "name": "Soft Rib Cardigan",
+   "gender": "women",
+   "category": "knitwear",
+   "price": 4600,
+   "compareAt": 5400,
+   "colours": [
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    },
+    {
+     "name": "Camel",
+     "hex": "#b58b5a"
+    },
+    {
+     "name": "Blush",
+     "hex": "#e3b7b0"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.4,
+   "sold": 215,
+   "stock": 6,
+   "blurb": "A longline cardigan in a ribbed, brushed knit."
+  },
+  {
+   "slug": "burgundy-wool-coat",
+   "name": "Burgundy Wool Coat",
+   "gender": "women",
+   "category": "jackets",
+   "price": 11800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Rose",
+     "hex": "#b5495b"
+    },
+    {
+     "name": "Plum",
+     "hex": "#5a2a4a"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.5,
+   "sold": 700,
+   "stock": 13,
+   "blurb": "A tailored wool-blend coat with a deep collar and clean lines."
+  },
+  {
+   "slug": "powder-blue-belted-coat",
+   "name": "Powder Blue Belted Coat",
+   "gender": "women",
+   "category": "jackets",
+   "price": 12600,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Sky",
+     "hex": "#bcd1e6"
+    },
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.6,
+   "sold": 111,
+   "stock": 20,
+   "blurb": "A belted wrap coat in a cool, pale blue."
+  },
+  {
+   "slug": "check-blazer",
+   "name": "Check Blazer",
+   "gender": "women",
+   "category": "jackets",
+   "price": 8900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Slate",
+     "hex": "#7a808a"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.7,
+   "sold": 164,
+   "stock": 9,
+   "blurb": "A boyfriend-cut blazer in a subtle check. Wear it with everything."
+  },
+  {
+   "slug": "classic-denim-jacket",
+   "name": "Classic Denim Jacket",
+   "gender": "women",
+   "category": "jackets",
+   "price": 5400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Denim",
+     "hex": "#5f7fa6"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1000&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.8,
+   "sold": 217,
+   "stock": 16,
+   "blurb": "A washed trucker jacket that gets better with every wear."
+  },
+  {
+   "slug": "blush-longline-coat",
+   "name": "Blush Longline Coat",
+   "gender": "women",
+   "category": "jackets",
+   "price": 10400,
+   "compareAt": 12200,
+   "colours": [
+    {
+     "name": "Blush",
+     "hex": "#e3b7b0"
+    },
+    {
+     "name": "Camel",
+     "hex": "#b58b5a"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.9,
+   "sold": 60,
+   "stock": 5,
+   "blurb": "A longline coat in soft blush, cut to sit just below the knee."
+  },
+  {
+   "slug": "striped-wide-leg-trouser",
+   "name": "Striped Wide-Leg Trouser",
+   "gender": "women",
+   "category": "trousers",
+   "price": 4600,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    },
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.1,
+   "sold": 260,
+   "stock": 12,
+   "blurb": "High-waist wide legs with a bold pinstripe. Movement in every step."
+  },
+  {
+   "slug": "high-rise-skinny-jean",
+   "name": "High-Rise Skinny Jean",
+   "gender": "women",
+   "category": "trousers",
+   "price": 3800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Denim",
+     "hex": "#5f7fa6"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "26",
+    "28",
+    "30",
+    "32",
+    "34"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.2,
+   "sold": 166,
+   "stock": 19,
+   "blurb": "Stretch denim with a high waist and an ankle-length hem."
+  },
+  {
+   "slug": "patched-straight-jean",
+   "name": "Patched Straight Jean",
+   "gender": "women",
+   "category": "trousers",
+   "price": 4200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Denim",
+     "hex": "#5f7fa6"
+    },
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    }
+   ],
+   "sizes": [
+    "26",
+    "28",
+    "30",
+    "32",
+    "34"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.3,
+   "sold": 219,
+   "stock": 8,
+   "blurb": "Relaxed straight legs with sewn-on patches and a distressed knee."
+  },
+  {
+   "slug": "sunshine-jogger-set",
+   "name": "Sunshine Jogger Set",
+   "gender": "women",
+   "category": "trousers",
+   "price": 5200,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Gold",
+     "hex": "#c9a24b"
+    },
+    {
+     "name": "Slate",
+     "hex": "#7a808a"
+    }
+   ],
+   "sizes": [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.4,
+   "sold": 62,
+   "stock": 15,
+   "blurb": "A cropped hoodie and jogger set in heavy brushed fleece."
+  },
+  {
+   "slug": "cream-court-pump",
+   "name": "Cream Court Pump",
+   "gender": "women",
+   "category": "shoes",
+   "price": 6400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Ivory",
+     "hex": "#efe9de"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.5,
+   "sold": 310,
+   "stock": 4,
+   "blurb": "A pointed pump with a 7cm heel. Comfortable enough for a full day."
+  },
+  {
+   "slug": "navy-suede-heel",
+   "name": "Navy Suede Heel",
+   "gender": "women",
+   "category": "shoes",
+   "price": 6900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Navy",
+     "hex": "#1f2a44"
+    },
+    {
+     "name": "Plum",
+     "hex": "#5a2a4a"
+    }
+   ],
+   "sizes": [
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.6,
+   "sold": 168,
+   "stock": 11,
+   "blurb": "Suede-effect court shoe with a slim gold-tone heel."
+  },
+  {
+   "slug": "floral-stiletto",
+   "name": "Floral Stiletto",
+   "gender": "women",
+   "category": "shoes",
+   "price": 7400,
+   "compareAt": 8600,
+   "colours": [
+    {
+     "name": "Cobalt",
+     "hex": "#2a4b8a"
+    },
+    {
+     "name": "Rose",
+     "hex": "#b5495b"
+    }
+   ],
+   "sizes": [
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.7,
+   "sold": 221,
+   "stock": 18,
+   "blurb": "A printed stiletto that makes the whole outfit."
+  },
+  {
+   "slug": "green-suede-derby",
+   "name": "Green Suede Derby",
+   "gender": "women",
+   "category": "shoes",
+   "price": 5800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Sage",
+     "hex": "#8ea58e"
+    },
+    {
+     "name": "Brown",
+     "hex": "#5a3a26"
+    }
+   ],
+   "sizes": [
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.8,
+   "sold": 64,
+   "stock": 7,
+   "blurb": "A flat lace-up in soft suede. Wear it with tailoring or a skirt."
+  },
+  {
+   "slug": "red-top-handle-bag",
+   "name": "Red Top-Handle Bag",
+   "gender": "women",
+   "category": "accessories",
+   "price": 8800,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Crimson",
+     "hex": "#b3202d"
+    },
+    {
+     "name": "Onyx",
+     "hex": "#1c1917"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": true,
+   "isNew": false,
+   "rating": 4.9,
+   "sold": 270,
+   "stock": 14,
+   "blurb": "Structured leather-look bag with a turn-lock and a detachable strap."
+  },
+  {
+   "slug": "woven-straw-handbag",
+   "name": "Woven Straw Handbag",
+   "gender": "women",
+   "category": "accessories",
+   "price": 5600,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Camel",
+     "hex": "#b58b5a"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.1,
+   "sold": 170,
+   "stock": 3,
+   "blurb": "A hand-woven top-handle bag with a leather trim."
+  },
+  {
+   "slug": "crystal-drop-earrings",
+   "name": "Crystal Drop Earrings",
+   "gender": "women",
+   "category": "accessories",
+   "price": 2400,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Steel",
+     "hex": "#9aa0a6"
+    },
+    {
+     "name": "Gold",
+     "hex": "#c9a24b"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.2,
+   "sold": 223,
+   "stock": 10,
+   "blurb": "Statement earrings with a sapphire-tone centre."
+  },
+  {
+   "slug": "layered-pendant-necklace",
+   "name": "Layered Pendant Necklace",
+   "gender": "women",
+   "category": "accessories",
+   "price": 2900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Gold",
+     "hex": "#c9a24b"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": true,
+   "rating": 4.3,
+   "sold": 66,
+   "stock": 17,
+   "blurb": "Three fine chains with a crescent and stone pendant."
+  },
+  {
+   "slug": "pearl-pendant",
+   "name": "Pearl Pendant",
+   "gender": "women",
+   "category": "accessories",
+   "price": 1900,
+   "compareAt": null,
+   "colours": [
+    {
+     "name": "Gold",
+     "hex": "#c9a24b"
+    },
+    {
+     "name": "Steel",
+     "hex": "#9aa0a6"
+    }
+   ],
+   "sizes": [
+    "One size"
+   ],
+   "images": [
+    "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=1000&q=75&auto=format&fit=crop"
+   ],
+   "colourImages": {},
+   "bestseller": false,
+   "isNew": false,
+   "rating": 4.4,
+   "sold": 119,
+   "stock": 6,
+   "blurb": "A single pearl on a fine chain. Wear it every day."
+  }
+ ]
+}

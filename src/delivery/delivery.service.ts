@@ -4,16 +4,7 @@ import { CacheService } from '../common/cache/cache.service';
 import { DomainError } from '../common/problem-details.filter';
 import { Db, PrismaService } from '../prisma/prisma.service';
 import { CreateZoneDto, UpdateZoneDto } from './delivery.dto';
-
-export interface DeliveryQuote {
-  county: string;
-  zone: { id: string; code: string; name: string; eta: string; etaDays: number };
-  fee: number;
-  freeOver: number | null;
-  free: boolean;
-  /** KES still needed to reach free delivery (null when there is no threshold). */
-  amountToFree: number | null;
-}
+import { DeliveryQuote } from './models';
 
 /** Case/whitespace-insensitive county comparison key. */
 const key = (s: string) => s.trim().toLowerCase();

@@ -26,6 +26,7 @@ const envSchema = z.object({
   MPESA_CONSUMER_SECRET: opt(z.string()),
   MPESA_SHORTCODE: opt(z.string()),
   MPESA_PASSKEY: opt(z.string()),
+  MPESA_TRANSACTION_TYPE: z.enum(['CustomerPayBillOnline', 'CustomerBuyGoodsOnline']).default('CustomerPayBillOnline'),
   MPESA_CALLBACK_URL: opt(z.string().url()),
   MPESA_CALLBACK_SECRET: opt(z.string().min(16)),
   ENABLE_SCHEDULER: z
@@ -53,6 +54,7 @@ export type AppConfig = {
     shortcode?: string;
     passkey?: string;
     /** Public URL Safaricom calls, e.g. https://api.example.com/api/v1/webhooks/mpesa/<secret> */
+    transactionType: 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline';
     callbackUrl?: string;
     /** Path secret that authenticates callbacks (Daraja callbacks are unsigned). */
     callbackSecret?: string;
@@ -86,6 +88,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       consumerSecret: e.MPESA_CONSUMER_SECRET || undefined,
       shortcode: e.MPESA_SHORTCODE || undefined,
       passkey: e.MPESA_PASSKEY || undefined,
+      transactionType: e.MPESA_TRANSACTION_TYPE,
       callbackUrl: e.MPESA_CALLBACK_URL || undefined,
       callbackSecret: e.MPESA_CALLBACK_SECRET || undefined,
     },

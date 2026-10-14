@@ -4,6 +4,7 @@ import { CacheService } from '../common/cache/cache.service';
 import { CursorPage, toCursorPage } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { StoreCategoriesQuery, StoreProductsQuery } from './catalogue.dto';
+import { StoreProductCard } from './models';
 
 const cardInclude = {
   category: { select: { id: true, slug: true, label: true } },
@@ -13,24 +14,6 @@ const cardInclude = {
 } satisfies Prisma.ProductInclude;
 
 type Card = Prisma.ProductGetPayload<{ include: typeof cardInclude }>;
-
-export interface StoreProductCard {
-  id: string;
-  slug: string;
-  name: string;
-  gender: string;
-  category: { id: string; slug: string; label: string };
-  price: number;
-  compareAt: number | null;
-  colours: { id: string; name: string; hex: string }[];
-  sizes: string[];
-  image: string | null;
-  isNew: boolean;
-  isBestseller: boolean;
-  rating: number;
-  sold: number;
-  inStock: boolean;
-}
 
 const available = (v: { inventory: { onHand: number; reserved: number } | null }) =>
   Math.max(0, (v.inventory?.onHand ?? 0) - (v.inventory?.reserved ?? 0));
