@@ -45,4 +45,13 @@ describe('rate limiting', () => {
     expect(statuses.slice(0, 5)).toEqual([200, 200, 200, 200, 200]);
     expect(statuses[5]).toBe(429);
   });
+
+  it('never throttles the M-Pesa callback, however many requests arrive from one address', async () => {
+    let limited = 0;
+    for (let i = 0; i < 130; i++) {
+      const r = await fetch(`${base}/webhooks/mpesa/not-the-secret`, json({}));
+      if (r.status === 429) limited++;
+    }
+    expect(limited).toBe(0);
+  });
 });

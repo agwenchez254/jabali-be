@@ -1,7 +1,11 @@
+import { Transform } from 'class-transformer';
 import { IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
+/** Trims before validation, so a name of only spaces fails the length check. */
+const trim = ({ value }: { value: unknown }): unknown => (typeof value === 'string' ? value.trim() : value);
+
 export class RegisterDto {
-  @IsString() @MinLength(2) @MaxLength(120) name: string;
+  @Transform(trim) @IsString() @MinLength(2) @MaxLength(120) name: string;
   @IsEmail() @MaxLength(254) email: string;
   /** Kenyan mobile, e.g. 0712345678 or +254712345678 */
   @IsString() @MaxLength(20) phone: string;
@@ -19,7 +23,7 @@ export class CustomerRefreshDto {
 }
 
 export class UpdateMeDto {
-  @IsOptional() @IsString() @MinLength(2) @MaxLength(120) name?: string;
+  @Transform(trim) @IsOptional() @IsString() @MinLength(2) @MaxLength(120) name?: string;
 }
 
 export class VerifyEmailDto {

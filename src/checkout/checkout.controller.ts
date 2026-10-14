@@ -44,10 +44,13 @@ export class StoreCheckoutController {
     res.status(created ? HttpStatus.CREATED : HttpStatus.OK);
     // Only for a newly created order: an idempotent replay must not email the receipt again.
     // The greeting uses the account's own name, never the name stored on a linked guest record.
-    if (created) this.mail.sendOrderConfirmation(customer.email, { ...order, customer: { ...order.customer, name: customer.name } });
-    if (!created) return { order, payment: null, idempotentReplay: true };
+    // The response and the email show the account's own name and email, never those on a linked guest record,
+    // which may have been written by someone else who used the same phone number.
+    const own = { ...order, customer: { ...order.customer, name: customer.name, email: customer.email } };
+    if (created) this.mail.sendOrderConfirmation(customer.email, own);
+    if (!created) return { order: own, payment: null, idempotentReplay: true };
     const payment = await this.payments.initiate(order.id).catch(() => null);
-    return { order, payment, idempotentReplay: false };
+    return { order: own, payment, idempotentReplay: false };
   }
 }
 

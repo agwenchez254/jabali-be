@@ -39,8 +39,8 @@ export interface VerificationStarted {
   resendAfterSeconds: number;
 }
 
-/** The account's own name wins: a linked guest record's name (set by someone else) is never shown. */
-const nameOf = (a: { displayName: string; customer: { name: string } }): string => a.displayName || a.customer.name;
+/** The account's own name only: a linked guest record's name (set by someone else) is never shown. */
+const nameOf = (a: { displayName: string }): string => a.displayName;
 
 const view = (a: AccountWithCustomer): CustomerView => ({ id: a.customer.id, name: nameOf(a), email: a.email, phone: a.customer.phone });
 
@@ -90,19 +90,21 @@ export class CustomerAuthService {
         if (byEmail) {
           if (byEmail.emailVerifiedAt) throw new DomainError(HttpStatus.CONFLICT, 'email_taken', CONFLICT_MESSAGE.email_taken);
           if (byEmail.verifyExpiresAt && byEmail.verifyExpiresAt > now) return { kind: 'pending' as const, account: byEmail };
-          await tx.customerAccount.delete({ where: { id: byEmail.id } }); // abandoned sign-up
+          await tx.customerAccount.deleteMany({ where: { id: byEmail.id } }); // abandoned sign-up
         }
         const existing = await tx.customer.findUnique({ where: { phone }, include: { account: true } });
         if (existing?.account) {
           const a = existing.account;
           const live = !a.emailVerifiedAt && !!a.verifyExpiresAt && a.verifyExpiresAt > now;
           if (a.emailVerifiedAt || live) throw new DomainError(HttpStatus.CONFLICT, 'phone_taken', CONFLICT_MESSAGE.phone_taken);
-          await tx.customerAccount.delete({ where: { id: a.id } }); // abandoned sign-up
+          await tx.customerAccount.deleteMany({ where: { id: a.id } }); // abandoned sign-up
         }
         // A guest customer with this phone (earlier anonymous orders) is linked so they keep their history, but its
         // details are left untouched until the email is verified.
         const customer = existing ?? (await tx.customer.create({ data: { phone, name, email } }));
-        const account = await tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash, displayName: name }, include: { customer: true } });
+        const account = await tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash, displayName: name, verifyExpiresAt: new Date(now.getTime() + OTP.ttlMinutes * 60_000) },
+          include: { customer: true },
+        });
         return { kind: 'created' as const, account };
       });
       if (outcome.kind === 'pending') {
@@ -115,7 +117,7 @@ export class CustomerAuthService {
         }
       }
       if (outcome.kind === 'created') this.security.log('register', { accountId: outcome.account.id, email, ip: meta.ip });
-      await this.sendCode(outcome.account, nameOf(outcome.account));
+      await this.sendCode(outcome.account.id, nameOf(outcome.account));
       return this.started(email);
     } catch (e) {
       if (isUniqueViolation(e)) {
@@ -129,37 +131,43 @@ export class CustomerAuthService {
   /**
    * Issues a fresh code unless the 60 second cool-down or the hourly cap says no. Callers never learn which
    * happened, so the response cannot be used to find out whether an email has a pending sign-up.
+   * The checks run on the account row locked FOR UPDATE, so parallel requests cannot all pass the cool-down
+   * and send several codes.
    */
-  private async sendCode(
-    account: { id: string; email: string; verifySentAt: Date | null; verifySendsThisHour: number; verifyWindowStart: Date | null },
-    name: string,
-  ): Promise<void> {
-    const now = Date.now();
-    if (account.verifySentAt && now - account.verifySentAt.getTime() < OTP.resendCooldownSeconds * 1000) return;
-    const windowFresh = !!account.verifyWindowStart && now - account.verifyWindowStart.getTime() < HOUR_MS;
-    const sends = windowFresh ? account.verifySendsThisHour : 0;
-    if (sends >= OTP.maxSendsPerHour) return;
-    const code = generateCode();
-    await this.prisma.customerAccount.update({
-      where: { id: account.id },
-      data: {
-        verifyCodeHash: hashCode(code, account.id, this.cfg.jwtAccessSecret),
-        verifyExpiresAt: new Date(now + OTP.ttlMinutes * 60_000),
-        verifyAttempts: 0,
-        verifySentAt: new Date(now),
-        verifySendsThisHour: sends + 1,
-        verifyWindowStart: windowFresh ? account.verifyWindowStart : new Date(now),
-      },
+  private async sendCode(accountId: string, name: string): Promise<void> {
+    const issued = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "customer_accounts" WHERE id = ${accountId}::uuid FOR UPDATE`;
+      const account = await tx.customerAccount.findUnique({ where: { id: accountId } });
+      if (!account || account.emailVerifiedAt) return null;
+      const now = Date.now();
+      if (account.verifySentAt && now - account.verifySentAt.getTime() < OTP.resendCooldownSeconds * 1000) return null;
+      const windowFresh = !!account.verifyWindowStart && now - account.verifyWindowStart.getTime() < HOUR_MS;
+      const sends = windowFresh ? account.verifySendsThisHour : 0;
+      if (sends >= OTP.maxSendsPerHour) return null;
+      const code = generateCode();
+      await tx.customerAccount.update({
+        where: { id: account.id },
+        data: {
+          verifyCodeHash: hashCode(code, account.id, this.cfg.jwtAccessSecret),
+          verifyExpiresAt: new Date(now + OTP.ttlMinutes * 60_000),
+          verifyAttempts: 0,
+          verifySentAt: new Date(now),
+          verifySendsThisHour: sends + 1,
+          verifyWindowStart: windowFresh ? account.verifyWindowStart : new Date(now),
+        },
+      });
+      return { email: account.email, code };
     });
-    this.mail.sendVerificationCode(account.email, name, code, OTP.ttlMinutes);
-    this.security.log('verification_sent', { accountId: account.id });
+    if (!issued) return;
+    this.mail.sendVerificationCode(issued.email, name, issued.code, OTP.ttlMinutes);
+    this.security.log('verification_sent', { accountId });
   }
 
   /** Sends another code to a pending account. Always resolves; silently does nothing for any other email. */
   async resend(emailRaw: string): Promise<void> {
     const account = await this.prisma.customerAccount.findUnique({ where: { email: emailRaw.trim().toLowerCase() }, include: { customer: true } });
     if (!account || account.emailVerifiedAt) return;
-    await this.sendCode(account, nameOf(account));
+    await this.sendCode(account.id, nameOf(account));
   }
 
   /** Confirms the emailed code, activates the account, issues the first tokens and sends the welcome email. */
@@ -174,16 +182,18 @@ export class CustomerAuthService {
     if (account.verifyExpiresAt <= new Date()) {
       throw new DomainError(HttpStatus.BAD_REQUEST, 'code_expired', 'That code has expired. Request a new one.');
     }
-    if (account.verifyAttempts >= OTP.maxAttempts) {
-      throw new DomainError(HttpStatus.BAD_REQUEST, 'too_many_attempts', 'Too many wrong codes. Request a new one.');
-    }
+    // Take an attempt BEFORE comparing, atomically: with check-then-act, parallel guesses would all slip under the cap.
+    const taken = await this.prisma.customerAccount.updateMany({
+      where: { id: account.id, emailVerifiedAt: null, verifyAttempts: { lt: OTP.maxAttempts } },
+      data: { verifyAttempts: { increment: 1 } },
+    });
+    if (taken.count !== 1) throw new DomainError(HttpStatus.BAD_REQUEST, 'too_many_attempts', 'Too many wrong codes. Request a new one.');
     // Both factors are always checked, so a wrong password and a wrong code look the same and cost the same.
     const codeOk = codesMatch(account.verifyCodeHash, hashCode(code, account.id, this.cfg.jwtAccessSecret));
     const passwordOk = await argon2.verify(account.passwordHash, password).catch(() => false);
     if (!codeOk || !passwordOk) {
-      const updated = await this.prisma.customerAccount.update({ where: { id: account.id }, data: { verifyAttempts: { increment: 1 } } });
       this.security.log('verification_failed', { accountId: account.id, ip: meta.ip, reason: 'wrong_code_or_password' });
-      throw invalid({ remainingAttempts: Math.max(0, OTP.maxAttempts - updated.verifyAttempts) });
+      throw invalid({ remainingAttempts: Math.max(0, OTP.maxAttempts - (account.verifyAttempts + 1)) });
     }
     // Claim atomically so two parallel requests with the right code cannot both activate and both get tokens.
     const claimed = await this.prisma.customerAccount.updateMany({

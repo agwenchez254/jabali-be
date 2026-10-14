@@ -23,6 +23,13 @@ export const RateLimit = (...rules: RateRule[]) => SetMetadata(RATE_RULES, rules
 
 export const perMinute = (name: string, limit: number, by: 'ip' | 'email'): RateRule => ({ name, limit, windowMs: MINUTE, by });
 
+export const perHour = (name: string, limit: number, by: 'ip' | 'email'): RateRule => ({ name, limit, windowMs: 60 * MINUTE, by });
+
+const SKIP_RATE_LIMIT = 'skip_rate_limit';
+
+/** For machine callers that must never be throttled, such as payment provider callbacks (they are authenticated by other means). */
+export const SkipRateLimit = () => SetMetadata(SKIP_RATE_LIMIT, true);
+
 @Injectable()
 export class RateLimitGuard implements CanActivate {
   private readonly limiter = new RateLimiter();
@@ -35,6 +42,7 @@ export class RateLimitGuard implements CanActivate {
 
   canActivate(ctx: ExecutionContext): boolean {
     if (!this.cfg.rateLimitEnabled) return true;
+    if (this.reflector.getAllAndOverride<boolean>(SKIP_RATE_LIMIT, [ctx.getHandler(), ctx.getClass()])) return true;
     const http = ctx.switchToHttp();
     const req = http.getRequest<Request>();
     const res = http.getResponse<Response>();

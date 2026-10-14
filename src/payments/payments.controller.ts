@@ -3,6 +3,7 @@ import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 import { timingSafeEqual } from 'node:crypto';
 import { AdminController, RequirePermissions } from '../common/auth/decorators';
+import { SkipRateLimit } from '../common/rate-limit/rate-limit.guard';
 import { PaymentsService } from './payments.service';
 import { stkCallbackSchema } from './providers/mpesa-daraja.provider';
 
@@ -31,6 +32,7 @@ export class StorePaymentsController {
  * Also restrict by Safaricom's published IP ranges at the proxy in production.
  */
 @ApiExcludeController()
+@SkipRateLimit()
 @Controller('webhooks/mpesa')
 export class MpesaWebhookController {
   constructor(private readonly payments: PaymentsService) {}
