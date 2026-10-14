@@ -53,5 +53,9 @@
     "ts-jest": "^29.4.14",
     "tsx": "^4.23.15",
     "typescript": "5.9"
+  },
+  "overrides": {
+    "js-yaml": "5.4.3",
+    "deepmerge-ts": "8.0.2"
   }
 }
