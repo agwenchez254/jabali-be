@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ContentBlock, Gender, Prisma } from '@prisma/client';
 import { CacheService } from '../common/cache/cache.service';
+import { StoreEventsService } from '../store-events/store-events.service';
 import { APP_CONFIG, AppConfig } from '../config/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { BlockListQuery, CreateBlockDto, ScheduleBlockDto, UpdateBlockDto } from './content.dto';
@@ -20,6 +21,7 @@ export class BlocksService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
+    private readonly events: StoreEventsService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
@@ -200,7 +202,7 @@ export class BlocksService implements OnModuleInit, OnModuleDestroy {
         await this.prisma.contentBlock.update({ where: { id }, data: { publishAt: null } });
       }
     }
-    if (n) void this.cache.invalidate();
+    if (n) void this.cache.invalidate().then(() => this.events.emit(['Home', 'Content']));
     return n;
   }
 

@@ -5,6 +5,7 @@ import type { Request } from 'express';
 import { Observable, tap } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from './cache/cache.service';
+import { StoreEventsService } from '../store-events/store-events.service';
 import { AuthUser } from './auth/auth.types';
 
 export const AUDIT_ENTITY = 'audit_entity';
@@ -46,6 +47,7 @@ export class AuditInterceptor implements NestInterceptor {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
+    private readonly events: StoreEventsService,
     private readonly reflector: Reflector,
   ) {}
 
@@ -73,7 +75,8 @@ export class AuditInterceptor implements NestInterceptor {
             },
           })
           .catch((e: unknown) => this.log.error(`audit write failed: ${String(e)}`));
-        void this.cache.invalidate();
+        // Clear the cache first so the storefront's refetch cannot read stale data.
+        void this.cache.invalidate().then(() => this.events.emitForEntity(entity));
       }),
     );
   }

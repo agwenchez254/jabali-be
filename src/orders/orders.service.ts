@@ -3,6 +3,7 @@ import { OrderStatus, Prisma } from '@prisma/client';
 import { CartService } from '../cart/cart.service';
 import { DomainError } from '../common/problem-details.filter';
 import { CacheService } from '../common/cache/cache.service';
+import { StoreEventsService } from '../store-events/store-events.service';
 import { pageArgs, toPage } from '../common/pagination';
 import { formatOrderNumber, isUniqueViolation, normalizePhone } from '../common/utils';
 import { APP_CONFIG, AppConfig } from '../config/config';
@@ -32,6 +33,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly cart: CartService,
     private readonly cache: CacheService,
+    private readonly events: StoreEventsService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
@@ -108,7 +110,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
         async (tx) => this.createOrderTx(tx, dto, phone, idempotencyKey),
         { maxWait: 10_000, timeout: 20_000 },
       );
-      void this.cache.invalidate('store:products');
+      void this.cache.invalidate('store:products').then(() => this.events.emit(['Product', 'Home']));
       const order = await this.prisma.order.findUniqueOrThrow({ where: { id }, include: orderInclude });
       return { order: this.view(order), created: true };
     } catch (e) {
@@ -344,7 +346,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       },
       { maxWait: 10_000, timeout: 20_000 },
     );
-    void this.cache.invalidate('store:products');
+    void this.cache.invalidate('store:products').then(() => this.events.emit(['Product', 'Home']));
     return this.get(id);
   }
 
