@@ -5,10 +5,9 @@ import { Db, PrismaService } from '../prisma/prisma.service';
 import { PageQueryDto } from '../common/pagination';
 import { CreatePromotionDto, PromotionListQuery, UpdatePromotionDto } from './promotions.dto';
 import { PricingPromotion } from './pricing/engine';
+import { PromotionState } from './models';
 
 type PromoRow = Promotion & { targets: PromotionTarget[] };
-
-export type PromotionState = 'draft' | 'paused' | 'scheduled' | 'live' | 'expired';
 
 export function promotionState(p: Pick<Promotion, 'status' | 'startsAt' | 'endsAt'>, now = new Date()): PromotionState {
   if (p.status === 'draft') return 'draft';
