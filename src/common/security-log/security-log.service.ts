@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-export type SecurityEvent = 'register' | 'login_success' | 'login_failed' | 'account_locked' | 'refresh_reuse' | 'token_type_rejected' | 'rate_limited';
+export type SecurityEvent = 'register' | 'verification_sent' | 'verification_failed' | 'email_verified' | 'login_success' | 'login_failed' | 'account_locked' | 'refresh_reuse' | 'token_type_rejected' | 'rate_limited';
 
 const SECRET_KEY = /password|token|secret|authorization|cookie/i;
 

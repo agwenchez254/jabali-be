@@ -1,5 +1,6 @@
 import { esc, firstName, kes, trimSlash } from './escape';
 import { orderConfirmationEmail, ReceiptOrder } from './order-confirmation';
+import { verificationCodeEmail } from './verification';
 import { welcomeEmail } from './welcome';
 
 const store = 'https://shop.example.com/';
@@ -40,23 +41,59 @@ describe('escape helpers', () => {
 
 describe('welcomeEmail', () => {
   const mail = welcomeEmail({ name: 'Amina Said', storeUrl: store });
-  it('greets by first name and links to the shop', () => {
+  it('greets by first name, says the account is verified and links to the shop and gifts', () => {
     expect(mail.subject).toMatch(/Welcome to Jabali/);
     expect(mail.html).toContain('Amina');
+    expect(mail.html).toMatch(/verified/i);
     expect(mail.html).toContain('href="https://shop.example.com/shop"');
+    expect(mail.html).toContain('href="https://shop.example.com/gift"');
     expect(mail.text).toContain('https://shop.example.com/shop');
   });
-  it('has the three onboarding steps in both parts and never mentions a password or token', () => {
+  it('lists the four Jabali promises in both parts and never mentions a password or token', () => {
     for (const part of [mail.html, mail.text]) {
       expect(part).toMatch(/M-Pesa/);
-      expect(part).toMatch(/Same-day delivery in Nairobi/);
+      expect(part).toMatch(/Same-day in Nairobi/);
+      expect(part).toMatch(/Pay on delivery/);
       expect(part).not.toMatch(/password|token/i);
     }
+  });
+  it('links only to the configured store', () => {
+    const hrefs = [...mail.html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs.length).toBeGreaterThan(1);
+    for (const h of hrefs) expect(h.startsWith('https://shop.example.com')).toBe(true);
   });
   it('escapes a hostile name', () => {
     const evil = welcomeEmail({ name: '<script>alert(1)</script> Amina', storeUrl: store });
     expect(evil.html).not.toContain('<script');
     expect(evil.html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+});
+
+describe('verificationCodeEmail', () => {
+  const mail = verificationCodeEmail({ name: 'Amina Said', code: '042917', minutes: 10, storeUrl: store });
+  it('shows the code in both parts but never in the subject', () => {
+    expect(mail.subject).toBe('Your Jabali verification code');
+    expect(mail.html).toContain('042917');
+    expect(mail.text).toContain('042917');
+  });
+  it('says how long the code lasts and what to do if it was not requested', () => {
+    for (const part of [mail.html, mail.text]) {
+      expect(part).toMatch(/10 minutes/);
+      expect(part).toMatch(/did not (create|request)|ignore this email/i);
+    }
+  });
+  it('carries no links except to the store (the code never travels in a URL)', () => {
+    const hrefs = [...mail.html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    for (const h of hrefs) {
+      expect(h.startsWith('https://shop.example.com')).toBe(true);
+      expect(h).not.toContain('042917');
+    }
+  });
+  it('escapes a hostile name and a hostile code', () => {
+    const evil = verificationCodeEmail({ name: '<img src=x onerror=alert(1)>', code: '<b>1</b>', minutes: 10, storeUrl: store });
+    expect(evil.html).not.toMatch(/<img |<b>1/);
+    expect(evil.html).toContain('&lt;img'); // only the first word of a name is used
+    expect(evil.html).toContain('&lt;b&gt;1&lt;/b&gt;');
   });
 });
 

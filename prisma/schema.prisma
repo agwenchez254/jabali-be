@@ -600,6 +600,15 @@ model CustomerAccount {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  // Email verification (null emailVerifiedAt = pending). Only a keyed hash of the code is stored.
+  emailVerifiedAt     DateTime?
+  verifyCodeHash      String?
+  verifyExpiresAt     DateTime?
+  verifyAttempts      Int       @default(0)
+  verifySentAt        DateTime?
+  verifySendsThisHour Int       @default(0)
+  verifyWindowStart   DateTime?
+
   customer      Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
   refreshTokens CustomerRefreshToken[]
 

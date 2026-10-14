@@ -2,6 +2,9 @@ import { Inject, Injectable, Logger, Provider } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { maskEmail } from '../common/security-log/security-log.service';
 import { APP_CONFIG, AppConfig } from '../config/config';
+import { orderConfirmationEmail, ReceiptOrder } from './templates/order-confirmation';
+import { verificationCodeEmail } from './templates/verification';
+import { welcomeEmail } from './templates/welcome';
 
 export const MAIL_TRANSPORT = Symbol('MAIL_TRANSPORT');
 
@@ -108,5 +111,20 @@ export class MailService {
   /** Fire and forget: mail never blocks or fails a request. */
   queue(msg: MailMessage): void {
     void this.send(msg);
+  }
+
+  /** The account-activation code. */
+  sendVerificationCode(to: string, name: string, code: string, minutes: number): void {
+    this.queue({ to, ...verificationCodeEmail({ name, code, minutes, storeUrl: this.cfg.mail.storeUrl }) });
+  }
+
+  /** Sent once, when the account is activated. */
+  sendWelcome(to: string, name: string): void {
+    this.queue({ to, ...welcomeEmail({ name, storeUrl: this.cfg.mail.storeUrl }) });
+  }
+
+  /** Order confirmation with the receipt in the body. */
+  sendOrderConfirmation(to: string, order: ReceiptOrder): void {
+    this.queue({ to, ...orderConfirmationEmail({ order, storeUrl: this.cfg.mail.storeUrl }) });
   }
 }

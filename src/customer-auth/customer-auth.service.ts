@@ -9,8 +9,10 @@ import { DomainError } from '../common/problem-details.filter';
 import { SecurityLogService } from '../common/security-log/security-log.service';
 import { isUniqueViolation, normalizePhone } from '../common/utils';
 import { APP_CONFIG, AppConfig } from '../config/config';
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto, UpdateMeDto } from './customer-auth.dto';
+import { codesMatch, generateCode, hashCode, OTP } from './otp';
 import { checkPassword } from './password-policy';
 
 const MAX_FAILED_LOGINS = 5;
@@ -18,6 +20,7 @@ const LOCK_MINUTES = 15;
 const ARGON = { type: argon2.argon2id, memoryCost: 65_536, timeCost: 3, parallelism: 4 } as const;
 // Keeps response time similar when the email does not exist.
 const DUMMY_HASH = '$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHRzb21lc2FsdA$Nl8bY2oYy0E3dLgKq8gqVwq2L8V6lGQy4vNn7qQe6hE';
+const HOUR_MS = 3_600_000;
 
 type Meta = { ip?: string; userAgent?: string };
 type AccountWithCustomer = { id: string; email: string; customer: { id: string; name: string; phone: string } };
@@ -27,6 +30,13 @@ export interface CustomerView {
   name: string;
   email: string;
   phone: string;
+}
+
+/** What sign-up returns: no tokens, only what the verification screen needs. */
+export interface VerificationStarted {
+  email: string;
+  expiresInSeconds: number;
+  resendAfterSeconds: number;
 }
 
 const view = (a: AccountWithCustomer): CustomerView => ({ id: a.customer.id, name: a.customer.name, email: a.email, phone: a.customer.phone });
@@ -48,10 +58,20 @@ export class CustomerAuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly security: SecurityLogService,
+    private readonly mail: MailService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
-  async register(dto: RegisterDto, meta: Meta) {
+  private started(email: string): VerificationStarted {
+    return { email, expiresInSeconds: OTP.ttlMinutes * 60, resendAfterSeconds: OTP.resendCooldownSeconds };
+  }
+
+  /**
+   * Creates a pending account and emails the activation code. No tokens until the code is confirmed.
+   * Signing up again with a pending email only re-sends the code: it never changes the password, so nobody can
+   * hijack someone else's half-finished sign-up. An abandoned sign-up (code expired) frees its email and phone.
+   */
+  async register(dto: RegisterDto, meta: Meta): Promise<VerificationStarted> {
     const email = dto.email.trim().toLowerCase();
     const phone = normalizePhone(dto.phone);
     if (!phone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'invalid_phone', 'Enter a valid Kenyan mobile number');
@@ -61,18 +81,31 @@ export class CustomerAuthService {
     const name = dto.name.trim();
 
     try {
-      const account = await this.prisma.$transaction(async (tx) => {
+      const outcome = await this.prisma.$transaction(async (tx) => {
+        const now = new Date();
+        const byEmail = await tx.customerAccount.findUnique({ where: { email }, include: { customer: true } });
+        if (byEmail) {
+          if (byEmail.emailVerifiedAt) throw new DomainError(HttpStatus.CONFLICT, 'email_taken', CONFLICT_MESSAGE.email_taken);
+          if (byEmail.verifyExpiresAt && byEmail.verifyExpiresAt > now) return { kind: 'pending' as const, account: byEmail };
+          await tx.customerAccount.delete({ where: { id: byEmail.id } }); // abandoned sign-up
+        }
         const existing = await tx.customer.findUnique({ where: { phone }, include: { account: true } });
-        if (existing?.account) throw new DomainError(HttpStatus.CONFLICT, 'phone_taken', CONFLICT_MESSAGE.phone_taken);
+        if (existing?.account) {
+          const a = existing.account;
+          const live = !a.emailVerifiedAt && !!a.verifyExpiresAt && a.verifyExpiresAt > now;
+          if (a.emailVerifiedAt || live) throw new DomainError(HttpStatus.CONFLICT, 'phone_taken', CONFLICT_MESSAGE.phone_taken);
+          await tx.customerAccount.delete({ where: { id: a.id } }); // abandoned sign-up
+        }
         // A guest customer with this phone (earlier anonymous orders) is claimed so they keep their history.
         const customer = existing
           ? await tx.customer.update({ where: { id: existing.id }, data: { name, email: existing.email ?? email } })
           : await tx.customer.create({ data: { phone, name, email } });
-        return tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash }, include: { customer: true } });
+        const account = await tx.customerAccount.create({ data: { customerId: customer.id, email, passwordHash }, include: { customer: true } });
+        return { kind: 'created' as const, account };
       });
-      const tokens = await this.issue(account, randomUUID(), meta);
-      this.security.log('register', { accountId: account.id, email, ip: meta.ip });
-      return { customer: view(account), tokens };
+      if (outcome.kind === 'created') this.security.log('register', { accountId: outcome.account.id, email, ip: meta.ip });
+      await this.sendCode(outcome.account, outcome.account.customer.name);
+      return this.started(email);
     } catch (e) {
       if (isUniqueViolation(e)) {
         const code = conflictCode(e);
@@ -80,6 +113,74 @@ export class CustomerAuthService {
       }
       throw e;
     }
+  }
+
+  /**
+   * Issues a fresh code unless the 60 second cool-down or the hourly cap says no. Callers never learn which
+   * happened, so the response cannot be used to find out whether an email has a pending sign-up.
+   */
+  private async sendCode(
+    account: { id: string; email: string; verifySentAt: Date | null; verifySendsThisHour: number; verifyWindowStart: Date | null },
+    name: string,
+  ): Promise<void> {
+    const now = Date.now();
+    if (account.verifySentAt && now - account.verifySentAt.getTime() < OTP.resendCooldownSeconds * 1000) return;
+    const windowFresh = !!account.verifyWindowStart && now - account.verifyWindowStart.getTime() < HOUR_MS;
+    const sends = windowFresh ? account.verifySendsThisHour : 0;
+    if (sends >= OTP.maxSendsPerHour) return;
+    const code = generateCode();
+    await this.prisma.customerAccount.update({
+      where: { id: account.id },
+      data: {
+        verifyCodeHash: hashCode(code, account.id, this.cfg.jwtAccessSecret),
+        verifyExpiresAt: new Date(now + OTP.ttlMinutes * 60_000),
+        verifyAttempts: 0,
+        verifySentAt: new Date(now),
+        verifySendsThisHour: sends + 1,
+        verifyWindowStart: windowFresh ? account.verifyWindowStart : new Date(now),
+      },
+    });
+    this.mail.sendVerificationCode(account.email, name, code, OTP.ttlMinutes);
+    this.security.log('verification_sent', { accountId: account.id });
+  }
+
+  /** Sends another code to a pending account. Always resolves; silently does nothing for any other email. */
+  async resend(emailRaw: string): Promise<void> {
+    const account = await this.prisma.customerAccount.findUnique({ where: { email: emailRaw.trim().toLowerCase() }, include: { customer: true } });
+    if (!account || account.emailVerifiedAt) return;
+    await this.sendCode(account, account.customer.name);
+  }
+
+  /** Confirms the emailed code, activates the account, issues the first tokens and sends the welcome email. */
+  async verify(emailRaw: string, code: string, meta: Meta) {
+    const email = emailRaw.trim().toLowerCase();
+    const invalid = (extra?: Record<string, unknown>) => new DomainError(HttpStatus.BAD_REQUEST, 'invalid_code', 'That code is not right', extra);
+    const account = await this.prisma.customerAccount.findUnique({ where: { email }, include: { customer: true } });
+    if (!account || account.emailVerifiedAt || !account.verifyCodeHash || !account.verifyExpiresAt) {
+      this.security.log('verification_failed', { email, ip: meta.ip, reason: 'no_pending_code' });
+      throw invalid();
+    }
+    if (account.verifyExpiresAt <= new Date()) {
+      throw new DomainError(HttpStatus.BAD_REQUEST, 'code_expired', 'That code has expired. Request a new one.');
+    }
+    if (account.verifyAttempts >= OTP.maxAttempts) {
+      throw new DomainError(HttpStatus.BAD_REQUEST, 'too_many_attempts', 'Too many wrong codes. Request a new one.');
+    }
+    if (!codesMatch(account.verifyCodeHash, hashCode(code, account.id, this.cfg.jwtAccessSecret))) {
+      const updated = await this.prisma.customerAccount.update({ where: { id: account.id }, data: { verifyAttempts: { increment: 1 } } });
+      this.security.log('verification_failed', { accountId: account.id, ip: meta.ip, reason: 'wrong_code' });
+      throw invalid({ remainingAttempts: Math.max(0, OTP.maxAttempts - updated.verifyAttempts) });
+    }
+    // Claim atomically so two parallel requests with the right code cannot both activate and both get tokens.
+    const claimed = await this.prisma.customerAccount.updateMany({
+      where: { id: account.id, emailVerifiedAt: null },
+      data: { emailVerifiedAt: new Date(), verifyCodeHash: null, verifyExpiresAt: null, verifyAttempts: 0 },
+    });
+    if (claimed.count !== 1) throw invalid();
+    this.security.log('email_verified', { accountId: account.id, ip: meta.ip });
+    this.mail.sendWelcome(account.email, account.customer.name);
+    const tokens = await this.issue(account, randomUUID(), meta);
+    return { customer: view(account), tokens };
   }
 
   async login(emailRaw: string, password: string, meta: Meta) {
@@ -108,6 +209,11 @@ export class CustomerAuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
     if (account.status !== 'active') throw new UnauthorizedException('Invalid email or password');
+    // Only someone who knows the password learns the account is waiting for its code.
+    if (!account.emailVerifiedAt) {
+      this.security.log('login_failed', { email: emailRaw, ip: meta.ip, accountId: account.id, reason: 'unverified' });
+      throw new DomainError(HttpStatus.FORBIDDEN, 'email_not_verified', 'Verify your email to sign in');
+    }
     await this.prisma.customerAccount.update({ where: { id: account.id }, data: { failedLogins: 0, lockedUntil: null, lastLoginAt: new Date() } });
     this.security.log('login_success', { accountId: account.id, ip: meta.ip });
     const tokens = await this.issue(account, randomUUID(), meta);
@@ -128,7 +234,7 @@ export class CustomerAuthService {
     const claimed = await this.prisma.customerRefreshToken.updateMany({ where: { id: row.id, revokedAt: null }, data: { revokedAt: new Date() } });
     if (claimed.count !== 1) throw new UnauthorizedException('Refresh token already used');
     const account = await this.prisma.customerAccount.findUnique({ where: { id: row.accountId }, include: { customer: true } });
-    if (!account || account.status !== 'active') throw new UnauthorizedException('Account disabled');
+    if (!account || account.status !== 'active' || !account.emailVerifiedAt) throw new UnauthorizedException('Account disabled');
     const tokens = await this.issue(account, row.familyId, meta, row.id);
     return { customer: view(account), tokens };
   }

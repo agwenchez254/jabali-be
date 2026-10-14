@@ -1,7 +1,20 @@
 import { esc } from './escape';
 
+export interface Hero {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+}
+
 /** Table-based layout with inline styles (email clients ignore most CSS). Jabali colours: ink #111311, accent #c6e24f. */
-export function layout(opts: { preheader: string; bodyHtml: string; storeUrl: string }): string {
+export function layout(opts: { preheader: string; bodyHtml: string; storeUrl: string; hero?: Hero }): string {
+  const hero = opts.hero
+    ? `<tr><td style="background:#111311;padding:8px 28px 36px;">
+<div style="color:#c6e24f;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">${esc(opts.hero.eyebrow)}</div>
+<h1 style="margin:10px 0 0;color:#ffffff;font-size:32px;line-height:1.15;font-weight:700;">${esc(opts.hero.title)}</h1>
+${opts.hero.subtitle ? `<p style="margin:14px 0 0;color:#cfd2cc;font-size:16px;line-height:1.55;">${esc(opts.hero.subtitle)}</p>` : ''}
+</td></tr>`
+    : '';
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Jabali</title></head>
 <body style="margin:0;background:#f4f4f1;font-family:Helvetica,Arial,sans-serif;color:#111311;">
@@ -9,6 +22,7 @@ export function layout(opts: { preheader: string; bodyHtml: string; storeUrl: st
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f1;"><tr><td align="center" style="padding:24px 12px;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;">
 <tr><td style="background:#111311;padding:20px 28px;"><a href="${esc(opts.storeUrl)}" style="color:#c6e24f;font-size:22px;font-weight:700;letter-spacing:2px;text-decoration:none;">JABALI</a></td></tr>
+${hero}
 <tr><td style="padding:28px;">${opts.bodyHtml}</td></tr>
 <tr><td style="padding:18px 28px;border-top:1px solid #e5e5e0;color:#6b6f6b;font-size:12px;line-height:1.5;">Prices in Kenya Shillings and include VAT.<br>Jabali &middot; <a href="${esc(opts.storeUrl)}" style="color:#6b6f6b;">${esc(opts.storeUrl.replace(/^https?:\/\//, ''))}</a></td></tr>
 </table></td></tr></table></body></html>`;

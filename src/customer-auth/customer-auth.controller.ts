@@ -6,8 +6,9 @@ import { CustomerAuthUser } from '../common/auth/auth.types';
 import { CurrentCustomer } from '../common/auth/customer.decorators';
 import { CustomerAuthGuard } from '../common/auth/customer.guard';
 import { perMinute, RateLimit } from '../common/rate-limit/rate-limit.guard';
-import { CustomerLoginDto, CustomerRefreshDto, RegisterDto, UpdateMeDto } from './customer-auth.dto';
-import { CustomerAuthService, CustomerView } from './customer-auth.service';
+import { CustomerLoginDto, CustomerRefreshDto, RegisterDto, ResendCodeDto, UpdateMeDto, VerifyEmailDto } from './customer-auth.dto';
+import { CustomerAuthService, CustomerView, VerificationStarted } from './customer-auth.service';
+import { OTP } from './otp';
 
 const body = (customer: CustomerView, t: TokenPair) => ({
   customer,
@@ -26,9 +27,27 @@ export class CustomerAuthController {
 
   @Post('register')
   @RateLimit(perMinute('register', 5, 'ip'))
-  async register(@Body() dto: RegisterDto, @Req() req: Request) {
-    const { customer, tokens } = await this.auth.register(dto, meta(req));
+  /** Creates a pending account and emails a 6-digit code. Tokens only come from `verify`. */
+  async register(@Body() dto: RegisterDto, @Req() req: Request): Promise<VerificationStarted> {
+    return this.auth.register(dto, meta(req));
+  }
+
+  /** Confirms the emailed code: activates the account and returns the first tokens. */
+  @Post('verify')
+  @HttpCode(200)
+  @RateLimit(perMinute('verify', 10, 'ip'), perMinute('verify-email', 10, 'email'))
+  async verify(@Body() dto: VerifyEmailDto, @Req() req: Request) {
+    const { customer, tokens } = await this.auth.verify(dto.email, dto.code, meta(req));
     return body(customer, tokens);
+  }
+
+  /** Always 200 with the same body, whatever the email, so it cannot be used to probe for accounts. */
+  @Post('resend')
+  @HttpCode(200)
+  @RateLimit(perMinute('resend', 5, 'ip'), perMinute('resend-email', 5, 'email'))
+  async resend(@Body() dto: ResendCodeDto): Promise<{ resendAfterSeconds: number }> {
+    await this.auth.resend(dto.email);
+    return { resendAfterSeconds: OTP.resendCooldownSeconds };
   }
 
   @Post('login')

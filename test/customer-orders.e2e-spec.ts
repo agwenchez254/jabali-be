@@ -1,6 +1,7 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD } from './global-setup';
 import { bootApp, json } from './helpers/app';
+import { registerVerified } from './helpers/auth';
 
 jest.setTimeout(60_000);
 
@@ -28,12 +29,8 @@ describe('POST /store/orders authentication', () => {
     expect(r.status).toBe(401);
   });
 
-  it('lets a customer token through the guard (an empty basket then fails validation with 400)', async () => {
-    const reg = await fetch(
-      `${base}/store/auth/register`,
-      json({ name: 'Order Tester', email: 'order.tester@example.com', phone: '0700123456', password: 'Sunrise-over-Nairobi-42' }),
-    );
-    const { accessToken } = (await reg.json()) as { accessToken: string };
+  it('lets a verified customer token through the guard (an empty basket then fails validation with 400)', async () => {
+    const { accessToken } = await registerVerified(app, base, { name: 'Order Tester', email: 'order.tester@example.com', phone: '0700123456', password: 'Sunrise-over-Nairobi-42' });
     const r = await fetch(`${base}/store/orders`, json({ lines: [] }, { ...key, authorization: `Bearer ${accessToken}` }));
     expect(r.status).toBe(400);
   });
