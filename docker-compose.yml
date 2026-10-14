@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jabali-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jabali
+      POSTGRES_PASSWORD: jabali_dev_pw
+      POSTGRES_DB: jabali
+    ports:
+      # 5433 is commonly taken by other local projects; 5439 avoids the clash.
+      - "5439:5432"
+    volumes:
+      - jabali_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jabali -d jabali"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  jabali_pgdata:
