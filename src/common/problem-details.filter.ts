@@ -83,6 +83,12 @@ export class ProblemDetailsFilter implements ExceptionFilter {
           break;
       }
     }
+    // body-parser (http-errors) client errors, e.g. a body over the size limit.
+    const client = exception as { status?: unknown; type?: unknown } | null;
+    if (typeof client?.status === 'number' && client.status >= 400 && client.status < 500 && typeof client.type === 'string') {
+      const detail = client.type === 'entity.too.large' ? 'Request body is too large' : 'Malformed request body';
+      return base(client.status, detail, { code: client.type });
+    }
     return base(HttpStatus.INTERNAL_SERVER_ERROR, 'Unexpected error');
   }
 }

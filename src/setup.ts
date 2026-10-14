@@ -2,7 +2,7 @@ import { BadRequestException, ValidationError, ValidationPipe } from '@nestjs/co
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
+import helmet, { type HelmetOptions } from 'helmet';
 import { resolve } from 'node:path';
 import { AppConfig } from './config/config';
 import { FieldError } from './common/models';
@@ -16,23 +16,31 @@ function flatten(errors: ValidationError[], parent = ''): FieldError[] {
   });
 }
 
+/** Helmet settings. The API only serves JSON, so production gets a CSP that allows nothing. */
+export function helmetOptions(cfg: Pick<AppConfig, 'nodeEnv'>): HelmetOptions {
+  return {
+    // Development keeps no CSP so Swagger UI can load its assets.
+    contentSecurityPolicy: cfg.nodeEnv === 'production' ? { useDefaults: false, directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } } : false,
+    strictTransportSecurity: { maxAge: 31_536_000, includeSubDomains: true },
+    referrerPolicy: { policy: 'no-referrer' },
+    // images from /uploads are embedded by the storefront and dashboard on other origins
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  };
+}
+
 /** Shared by main.ts and the e2e tests so both run the exact same pipeline. */
 export function configureApp(app: NestExpressApplication, cfg: AppConfig, opts: { swagger?: boolean } = {}): void {
-  app.set('trust proxy', 1);
-  app.use(
-    helmet({
-      // images from /uploads are embedded by the storefront and dashboard on other origins
-      crossOriginResourcePolicy: { policy: 'cross-origin' },
-    }),
-  );
+  app.set('trust proxy', cfg.trustProxyHops);
+  app.use(helmet(helmetOptions(cfg)));
   app.use(cookieParser());
   app.enableCors({
     origin: cfg.corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
-    exposedHeaders: ['ETag'],
+    exposedHeaders: ['ETag', 'Retry-After'],
   });
+  app.useBodyParser('json', { limit: '100kb' });
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -45,9 +53,17 @@ export function configureApp(app: NestExpressApplication, cfg: AppConfig, opts: 
     }),
   );
   app.useGlobalFilters(new ProblemDetailsFilter());
-  app.useStaticAssets(resolve(cfg.uploadDir), { prefix: '/uploads', maxAge: '7d' });
+  app.useStaticAssets(resolve(cfg.uploadDir), {
+    prefix: '/uploads',
+    maxAge: '7d',
+    // Uploaded files must never be able to run script in the API origin.
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', 'sandbox');
+    },
+  });
 
-  if (opts.swagger) {
+  if (opts.swagger && cfg.nodeEnv !== 'production') {
     const doc = SwaggerModule.createDocument(
       app,
       new DocumentBuilder()

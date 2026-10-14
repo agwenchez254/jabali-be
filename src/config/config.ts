@@ -33,6 +33,12 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  // Number of reverse proxies in front of the API (so req.ip is the real client address).
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
+  RATE_LIMIT_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = {
@@ -47,6 +53,8 @@ export type AppConfig = {
   publicBaseUrl: string;
   maxUploadBytes: number;
   enableScheduler: boolean;
+  trustProxyHops: number;
+  rateLimitEnabled: boolean;
   mpesa: {
     env: 'sandbox' | 'production';
     consumerKey?: string;
@@ -63,6 +71,14 @@ export type AppConfig = {
 
 export const APP_CONFIG = Symbol('APP_CONFIG');
 
+/** Wildcards are never allowed (credentials are enabled); production origins must be https. */
+export function assertCorsOrigins(origins: string[], nodeEnv: AppConfig['nodeEnv']): void {
+  for (const o of origins) {
+    if (o.includes('*')) throw new Error('CORS_ORIGINS must not contain a wildcard');
+    if (nodeEnv === 'production' && !o.startsWith('https://')) throw new Error(`CORS_ORIGINS must use https in production (got ${o})`);
+  }
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = envSchema.safeParse(env);
   if (!parsed.success) {
@@ -70,6 +86,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error(`Invalid environment configuration: ${msg}`);
   }
   const e = parsed.data;
+  assertCorsOrigins(e.CORS_ORIGINS, e.NODE_ENV);
+  if (e.NODE_ENV === 'production' && !e.RATE_LIMIT_ENABLED) throw new Error('RATE_LIMIT_ENABLED=false is not allowed in production');
   return {
     nodeEnv: e.NODE_ENV,
     port: e.PORT,
@@ -82,6 +100,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     publicBaseUrl: e.PUBLIC_BASE_URL.replace(/\/$/, ''),
     maxUploadBytes: Math.round(e.MAX_UPLOAD_MB * 1024 * 1024),
     enableScheduler: e.ENABLE_SCHEDULER,
+    trustProxyHops: e.TRUST_PROXY_HOPS,
+    rateLimitEnabled: e.RATE_LIMIT_ENABLED,
     mpesa: {
       env: e.MPESA_ENV,
       consumerKey: e.MPESA_CONSUMER_KEY || undefined,
