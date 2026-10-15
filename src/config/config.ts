@@ -35,6 +35,7 @@ const envSchema = z.object({
     .transform((v) => v === 'true'),
   // Email (SMTP). Empty SMTP_URL = log-only transport in development and test.
   SMTP_URL: opt(z.string().regex(/^smtps?:\/\/\S+$/, 'SMTP_URL must start with smtp:// or smtps://')),
+  RESEND_API_KEY: z.string(),
   MAIL_FROM: z
     .string()
     .min(3)
@@ -64,7 +65,7 @@ export type AppConfig = {
   enableScheduler: boolean;
   trustProxyHops: number;
   rateLimitEnabled: boolean;
-  mail: { smtpUrl?: string; from: string; replyTo?: string; storeUrl: string };
+  mail: { smtpUrl?: string; from: string; replyTo?: string; storeUrl: string, apiKey: string };
   mpesa: {
     env: 'sandbox' | 'production';
     consumerKey?: string;
@@ -116,7 +117,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     enableScheduler: e.ENABLE_SCHEDULER,
     trustProxyHops: e.TRUST_PROXY_HOPS,
     rateLimitEnabled: e.RATE_LIMIT_ENABLED,
-    mail: { smtpUrl: e.SMTP_URL || undefined, from: e.MAIL_FROM, replyTo: e.MAIL_REPLY_TO || undefined, storeUrl: e.STORE_URL.replace(/\/+$/, '') },
+    mail: { smtpUrl: e.SMTP_URL || undefined, from: e.MAIL_FROM, replyTo: e.MAIL_REPLY_TO || undefined, storeUrl: e.STORE_URL.replace(/\/+$/, ''), apiKey: e.RESEND_API_KEY },
     mpesa: {
       env: e.MPESA_ENV,
       consumerKey: e.MPESA_CONSUMER_KEY || undefined,

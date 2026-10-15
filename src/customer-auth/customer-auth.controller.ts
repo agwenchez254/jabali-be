@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { TokenPair } from '../auth/models';
@@ -9,6 +9,8 @@ import { perHour, perMinute, RateLimit } from '../common/rate-limit/rate-limit.g
 import { CustomerLoginDto, CustomerRefreshDto, RegisterDto, ResendCodeDto, UpdateMeDto, VerifyEmailDto } from './customer-auth.dto';
 import { CustomerAuthService, CustomerView, VerificationStarted } from './customer-auth.service';
 import { OTP } from './otp';
+import { CreateAddressDto, UpdateAddressDto } from './addresses.dto';
+import { AddressesService } from './addresses.service';
 
 const body = (customer: CustomerView, t: TokenPair) => ({
   customer,
@@ -78,7 +80,30 @@ export class CustomerAuthController {
 @UseGuards(CustomerAuthGuard)
 @Controller('store/me')
 export class StoreMeController {
-  constructor(private readonly auth: CustomerAuthService) {}
+  constructor(
+    private readonly auth: CustomerAuthService,
+    private readonly addresses: AddressesService,
+  ) {}
+
+  @Get('addresses')
+  listAddresses(@CurrentCustomer() c: CustomerAuthUser) {
+    return this.addresses.list(c.accountId);
+  }
+
+  @Post('addresses')
+  createAddress(@CurrentCustomer() c: CustomerAuthUser, @Body() dto: CreateAddressDto) {
+    return this.addresses.create(c.accountId, dto);
+  }
+
+  @Patch('addresses/:id')
+  updateAddress(@CurrentCustomer() c: CustomerAuthUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateAddressDto) {
+    return this.addresses.update(c.accountId, id, dto);
+  }
+
+  @Delete('addresses/:id') @HttpCode(204)
+  async removeAddress(@CurrentCustomer() c: CustomerAuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.addresses.remove(c.accountId, id);
+  }
 
   @Get()
   me(@CurrentCustomer() c: CustomerAuthUser) {

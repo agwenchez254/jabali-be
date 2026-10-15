@@ -38,21 +38,29 @@ export class RateLimitGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly security: SecurityLogService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
-  ) {}
+  ) { }
 
   canActivate(ctx: ExecutionContext): boolean {
-    if (!this.cfg.rateLimitEnabled) return true;
+    // Bypass rate limiting if disabled in config or via environment variable during load tests
+    if (!this.cfg.rateLimitEnabled || process.env.DISABLE_RATE_LIMIT === 'true') {
+      return true;
+    }
+
     if (this.reflector.getAllAndOverride<boolean>(SKIP_RATE_LIMIT, [ctx.getHandler(), ctx.getClass()])) return true;
     const http = ctx.switchToHttp();
     const req = http.getRequest<Request>();
     const res = http.getResponse<Response>();
+
     const rules = [DEFAULT_RULE, ...(this.reflector.getAllAndOverride<RateRule[]>(RATE_RULES, [ctx.getHandler(), ctx.getClass()]) ?? [])];
+
     for (const rule of rules) {
       const subject = rule.by === 'ip' ? (req.ip ?? 'unknown') : emailOf(req);
       if (!subject) continue;
+
       // Route rules are keyed by route path so one route's traffic cannot use up another route's allowance.
       const path = rule.name === 'default' ? '' : ((req.route as { path?: string } | undefined)?.path ?? '');
       const r = this.limiter.hit(`${rule.name}:${rule.by}:${path}:${subject}`, rule.limit, rule.windowMs);
+
       if (!r.allowed) {
         res.setHeader('Retry-After', String(r.retryAfterSec));
         this.security.log('rate_limited', { rule: rule.name, ip: req.ip });

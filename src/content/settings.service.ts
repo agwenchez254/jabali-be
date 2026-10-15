@@ -8,8 +8,10 @@ export const SETTING_SCHEMAS = {
   freeDeliveryThreshold: z.number().int().min(0).nullable(),
   whatsappNumber: z.string().max(30),
   pickupAddress: z.string().max(300),
-  announcementBar: z.object({ enabled: z.boolean(), text: z.string().max(200), link: z.string().max(300).optional() }),
+  announcementBar: z.object({ enabled: z.boolean(), text: z.string().max(200), link: z.string().max(300).optional(), linkLabel: z.string().max(40).optional() }),
   paymentMethods: z.array(z.enum(['cod', 'mpesa', 'airtel', 'card'])).min(1),
+  giftFee: z.number().int().min(0).max(100_000),
+  codZoneCodes: z.array(z.string().min(1).max(40)).max(50),
 } as const;
 
 export type SettingKey = keyof typeof SETTING_SCHEMAS;
@@ -18,8 +20,10 @@ export const SETTING_DESCRIPTIONS: Record<SettingKey, string> = {
   freeDeliveryThreshold: 'KES order amount (after discounts) above which delivery is free; null = never (zone.freeOver overrides)',
   whatsappNumber: 'Customer-care WhatsApp number, international format',
   pickupAddress: 'Address shown for pickup orders',
-  announcementBar: '{ enabled, text, link? } banner at the top of the storefront',
+  announcementBar: '{ enabled, text, link?, linkLabel? } banner (link + linkLabel = call-to-action button) at the top of the storefront',
   paymentMethods: 'Payment methods offered at checkout: cod | mpesa | airtel | card',
+  giftFee: 'KES added per gift-wrapped unit (wrap and card)',
+  codZoneCodes: 'Codes of the delivery zones where pay-on-delivery is offered (pickup always allows it)',
 };
 
 @Injectable()

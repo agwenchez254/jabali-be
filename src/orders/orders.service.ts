@@ -136,6 +136,9 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
     // 2. re-price from current data using the same engine as /store/cart/quote
     const priced = await this.cart.price(tx, { lines: dto.lines, promoCode: dto.promoCode, method: dto.method, county: dto.county, phone });
     const { resolved, pricing, zone } = priced;
+    if (dto.paymentMethod === 'cod' && !priced.codAllowed) {
+      throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'cod_not_available', 'Pay on delivery is not available for this order');
+    }
     if (dto.method === 'delivery' && !zone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'county_required', 'A delivery county is required');
     if (resolved.items.length === 0 || resolved.warnings.length > 0) {
       throw new DomainError(HttpStatus.CONFLICT, 'insufficient_stock', 'Some items are no longer available in the requested quantity', {

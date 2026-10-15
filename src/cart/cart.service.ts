@@ -8,6 +8,10 @@ import { normalizePhone } from '../common/utils';
 import { CartQuoteDto, QuoteLineDto } from './cart.dto';
 import { CartQuote, CartWarning, PricedCart, ResolvedCart, ResolvedItem } from './models';
 
+/** Used until the admin sets the matching site settings. */
+export const DEFAULT_GIFT_FEE = 350;
+export const DEFAULT_COD_ZONES = ['nairobi'];
+
 @Injectable()
 export class CartService {
   constructor(
@@ -16,6 +20,16 @@ export class CartService {
     private readonly promotions: PromotionsService,
   ) {}
 
+  async giftFee(db: Db = this.prisma): Promise<number> {
+    const row = await db.siteSetting.findUnique({ where: { key: 'giftFee' } });
+    return typeof row?.value === 'number' ? row.value : DEFAULT_GIFT_FEE;
+  }
+
+  private async codZones(db: Db): Promise<string[]> {
+    const row = await db.siteSetting.findUnique({ where: { key: 'codZoneCodes' } });
+    return Array.isArray(row?.value) ? (row.value as unknown[]).filter((c): c is string => typeof c === 'string') : DEFAULT_COD_ZONES;
+  }
+
   /** Merges duplicate variants and loads current price/stock. Unknown or inactive variants become warnings. */
   async resolve(db: Db, lines: QuoteLineDto[]): Promise<ResolvedCart> {
     const merged = new Map<string, QuoteLineDto>();
@@ -23,6 +37,7 @@ export class CartService {
       const prev = merged.get(l.variantId);
       merged.set(l.variantId, prev ? { ...prev, qty: prev.qty + l.qty, gift: l.gift ?? prev.gift } : { ...l });
     }
+    const giftFee = await this.giftFee(db);
     const variants = await db.variant.findMany({
       where: { id: { in: [...merged.keys()] } },
       include: {
@@ -54,7 +69,7 @@ export class CartService {
         colour: v.colour.name,
         size: v.size,
         sku: v.sku,
-        unitPrice: v.priceOverride ?? v.product.basePrice,
+        unitPrice: (v.priceOverride ?? v.product.basePrice) + (line.gift ? giftFee : 0),
         qty: line.qty,
         available,
         image: ownImage?.media.url ?? null,
@@ -94,15 +109,16 @@ export class CartService {
       now: opts.now ?? new Date(),
       delivery,
     });
-    return { resolved, pricing, zone, method };
+    const codAllowed = method === 'pickup' || (zone !== null && (await this.codZones(db)).includes(zone.code));
+    return { resolved, pricing, zone, method, codAllowed };
   }
 
   async quote(dto: CartQuoteDto, opts: { promotions?: PricingPromotion[] } = {}): Promise<CartQuote> {
     const priced = await this.price(this.prisma, dto, opts);
-    return this.format(priced, dto);
+    return this.format(priced, dto, await this.giftFee());
   }
 
-  format(priced: PricedCart, dto: Pick<CartQuoteDto, 'county'>): CartQuote {
+  format(priced: PricedCart, dto: Pick<CartQuoteDto, 'county'>, giftFee = DEFAULT_GIFT_FEE): CartQuote {
     const { resolved, pricing, zone, method } = priced;
     const byLine = new Map(pricing.lines.map((l) => [l.lineId, l]));
     return {
@@ -130,6 +146,8 @@ export class CartService {
       total: pricing.total,
       method,
       deliveryPending: method === 'delivery' && !dto.county,
+      codAllowed: priced.codAllowed,
+      giftFee,
       delivery: zone ? { zone: zone.name, eta: zone.eta, etaDays: zone.etaDays } : null,
       applied: pricing.applied,
       promo: pricing.code,

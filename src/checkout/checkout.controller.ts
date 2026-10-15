@@ -49,7 +49,7 @@ export class StoreCheckoutController {
     const own = { ...order, customer: { ...order.customer, name: customer.name, email: customer.email } };
     if (created) this.mail.sendOrderConfirmation(customer.email, own);
     if (!created) return { order: own, payment: null, idempotentReplay: true };
-    const payment = await this.payments.initiate(order.id).catch(() => null);
+    const payment = await this.payments.initiate(order.id, dto.payerPhone).catch(() => null);
     return { order: own, payment, idempotentReplay: false };
   }
 }

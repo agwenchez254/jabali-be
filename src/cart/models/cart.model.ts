@@ -33,6 +33,8 @@ export interface PricedCart {
   pricing: PricingResult;
   zone: DeliveryZone | null;
   method: 'delivery' | 'pickup';
+  /** Whether pay-on-delivery may be used for this order. */
+  codAllowed: boolean;
 }
 
 export interface CartQuote {
@@ -58,6 +60,10 @@ export interface CartQuote {
   method: 'delivery' | 'pickup';
   /** True when delivery was requested but no county was given, so the fee is not included yet. */
   deliveryPending: boolean;
+  /** Whether pay-on-delivery may be used: pickup, or delivery to a zone that allows it. */
+  codAllowed: boolean;
+  /** KES added per gift-wrapped unit (already included in the unit price of gift lines). */
+  giftFee: number;
   delivery: { zone: string; eta: string; etaDays: number } | null;
   applied: PricingResult['applied'];
   promo: PricingResult['code'];

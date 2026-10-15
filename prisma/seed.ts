@@ -277,6 +277,8 @@ async function main(): Promise<void> {
     pickupAddress: 'Jabali Studio, 2nd Floor, Kimathi House, Kimathi Street, Nairobi CBD',
     announcementBar: { enabled: false, text: '' },
     paymentMethods: ['cod', 'mpesa'],
+    giftFee: 350,
+    codZoneCodes: ['nairobi'],
   };
   for (const [key, value] of Object.entries(settings)) {
     await prisma.siteSetting.upsert({ where: { key }, update: {}, create: { key, value: value ?? Prisma.JsonNull } });

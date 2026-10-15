@@ -59,7 +59,7 @@ export class AnalyticsService {
     const rows = await this.prisma.$queryRaw<{ day: string; revenue: bigint; orders: bigint }[]>`
       WITH d AS (
         SELECT generate_series(
-          (date_trunc('day', now() AT TIME ZONE ${TZ}) - make_interval(days => ${days - 1})),
+          (date_trunc('day', now() AT TIME ZONE ${TZ}) - make_interval(days => ${days - 1}::int)),
           date_trunc('day', now() AT TIME ZONE ${TZ}),
           interval '1 day') AS day
       )
@@ -79,7 +79,7 @@ export class AnalyticsService {
              SUM(l.qty)::bigint AS units,
              SUM(l."unitPrice" * l.qty - l."discountAmount")::bigint AS revenue
       FROM order_lines l JOIN orders o ON o.id = l."orderId"
-      WHERE ${REVENUE} AND o."createdAt" >= now() - make_interval(days => ${days})
+      WHERE ${REVENUE} AND o."createdAt" >= now() - make_interval(days => ${days}::int)
       GROUP BY l."productId" ORDER BY units DESC, revenue DESC LIMIT ${limit}`;
     return rows.map((r) => ({ productId: r.productId, name: r.name, units: n(r.units), revenue: n(r.revenue) }));
   }

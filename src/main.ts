@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { loadConfig } from './config/config';
 import { configureApp } from './setup';
+import compression from 'compression'
 
 async function bootstrap(): Promise<void> {
   try {
@@ -14,7 +15,7 @@ async function bootstrap(): Promise<void> {
   }
   const cfg = loadConfig();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  configureApp(app, cfg, { swagger: true });
+  app.use(compression()); configureApp(app, cfg, { swagger: true });
   app.enableShutdownHooks();
   await app.listen(cfg.port);
   new Logger('Bootstrap').log(`API on http://localhost:${cfg.port}/api/v1  docs: /api/docs`);

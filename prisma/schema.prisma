@@ -613,8 +613,31 @@ model CustomerAccount {
 
   customer      Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
   refreshTokens CustomerRefreshToken[]
+  addresses     CustomerAddress[]
 
   @@map("customer_accounts")
+}
+
+/// A saved delivery place. A customer keeps several and picks one per order.
+model CustomerAddress {
+  id        String   @id @default(uuid()) @db.Uuid
+  accountId String   @db.Uuid
+  /// Short name the customer recognises, e.g. "Home" or "Office".
+  label     String
+  county    String
+  area      String
+  street    String
+  /// Who receives it, when not the account holder.
+  recipient String?
+  phone     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account CustomerAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@map("customer_addresses")
 }
 
 model CustomerRefreshToken {

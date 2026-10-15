@@ -38,6 +38,8 @@ export class CheckoutDto {
   @ValidateIf((o: CheckoutDto) => o.method === 'delivery') @IsString() @MinLength(3) @MaxLength(300) address?: string;
   @IsIn(['cod', 'mpesa', 'airtel', 'card']) paymentMethod: PaymentProvider;
   @IsOptional() @IsString() @MaxLength(500) notes?: string;
+  /** Mobile-money number to prompt, when it is not the account's phone. */
+  @IsOptional() @IsString() @MaxLength(20) payerPhone?: string;
 }
 
 export class AdminOrderListQuery extends PageQueryDto {

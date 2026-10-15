@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, Provider } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { maskEmail } from '../common/security-log/security-log.service';
 import { APP_CONFIG, AppConfig } from '../config/config';
 import { orderConfirmationEmail, ReceiptOrder } from './templates/order-confirmation';
@@ -43,41 +43,67 @@ const sleep = (ms: number) =>
 const verificationCodeIn = (mail: OutgoingMail): string | undefined => (/verification code/i.test(mail.subject) ? /\b(\d{6})\b/.exec(mail.text)?.[1] : undefined);
 
 /**
- * Used when no SMTP server is configured (development and test): nothing leaves the machine.
- * With `showCodes` it also prints a verification code in the API terminal so sign-up can be finished without a mail
- * server. That is safe only because production config refuses to start without SMTP_URL, and the provider below
+ * Used when no Resend API key is configured (development and test): nothing leaves the machine.
+ * With `showCodes` it also prints a verification code in the API terminal so sign-up can be finished without an email
+ * service. That is safe only because production config refuses to start without an API key, and the provider below
  * passes `showCodes = false` in production as a second guard. No other message content is ever printed.
  */
 export class LogTransport implements MailTransport {
   readonly outbox: OutgoingMail[] = [];
   private readonly log = new Logger('Mail');
 
-  constructor(private readonly showCodes = true) {}
+  constructor(private readonly showCodes = true) { }
 
   sendMail(mail: OutgoingMail): Promise<{ messageId?: string }> {
     this.outbox.push(mail);
     if (this.outbox.length > 50) this.outbox.shift();
-    this.log.log(`SMTP_URL is not set, so this email was not sent: "${mail.subject}" to ${maskEmail(mail.to)}`);
+    this.log.log(`Resend API key is not set, so this email was not sent: "${mail.subject}" to ${maskEmail(mail.to)}`);
     const code = this.showCodes ? verificationCodeIn(mail) : undefined;
-    if (code) this.log.log(`DEV ONLY (no SMTP server configured) | verification code for ${mail.to}: ${code}`);
+    if (code) this.log.log(`DEV ONLY (no mail service configured) | verification code for ${mail.to}: ${code}`);
     return Promise.resolve({ messageId: 'log-only' });
+  }
+}
+
+/**
+ * Production-ready transport using the official Resend SDK.
+ */
+export class ResendTransport implements MailTransport {
+  private readonly resend: Resend;
+
+  constructor(apiKey: string) {
+    this.resend = new Resend(apiKey);
+  }
+
+  async sendMail(mail: OutgoingMail): Promise<{ messageId?: string }> {
+    const response = await this.resend.emails.send({
+      from: mail.from,
+      to: mail.to,
+      replyTo: mail.replyTo,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
+    });
+
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+
+    return { messageId: response.data?.id };
   }
 }
 
 export const mailTransportProvider: Provider = {
   provide: MAIL_TRANSPORT,
   inject: [APP_CONFIG],
-  useFactory: (cfg: AppConfig): MailTransport =>
-    cfg.mail.smtpUrl
-      ? (nodemailer.createTransport({
-          url: cfg.mail.smtpUrl,
-          connectionTimeout: 10_000,
-          greetingTimeout: 10_000,
-          socketTimeout: 20_000,
-          // Never send credentials or customer data over a plaintext SMTP session in production.
-          requireTLS: cfg.nodeEnv === 'production' && cfg.mail.smtpUrl.startsWith('smtp:'),
-        }) as unknown as MailTransport)
-      : new LogTransport(cfg.nodeEnv !== 'production'),
+  useFactory: (cfg: AppConfig): MailTransport => {
+    // Assuming your AppConfig has a mail.apiKey property for Resend.
+    // Fall back to cfg.mail.smtpUrl or process.env.RESEND_API_KEY if needed.
+    const apiKey = cfg.mail.apiKey || process.env.RESEND_API_KEY;
+
+    return apiKey
+      ? new ResendTransport(apiKey)
+      : new LogTransport(cfg.nodeEnv !== 'production');
+  },
 };
 
 @Injectable()
@@ -89,9 +115,9 @@ export class MailService {
   constructor(
     @Inject(MAIL_TRANSPORT) private readonly transport: MailTransport,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
-  ) {}
+  ) { }
 
-  /** Resolves true once the SMTP server accepted the message. Never throws. */
+  /** Resolves true once Resend accepted the message. Never throws. */
   async send(msg: MailMessage): Promise<boolean> {
     if (!RECIPIENT.test(msg.to)) {
       this.log.warn('Skipped an email: invalid recipient address');
