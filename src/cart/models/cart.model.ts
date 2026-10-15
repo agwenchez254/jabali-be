@@ -37,6 +37,12 @@ export interface PricedCart {
   codAllowed: boolean;
 }
 
+/** VAT included in a quote's total, or null while VAT is off. */
+export interface QuoteVat {
+  ratePercent: number;
+  amount: number;
+}
+
 export interface CartQuote {
   lines: {
     variantId: string;
@@ -64,6 +70,7 @@ export interface CartQuote {
   codAllowed: boolean;
   /** KES added per gift-wrapped unit (already included in the unit price of gift lines). */
   giftFee: number;
+  vat: QuoteVat | null;
   delivery: { zone: string; eta: string; etaDays: number } | null;
   applied: PricingResult['applied'];
   promo: PricingResult['code'];

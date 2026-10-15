@@ -12,6 +12,7 @@ import { Db, PrismaService } from '../prisma/prisma.service';
 import { AdminOrderListQuery, CheckoutDto } from './orders.dto';
 import { Actor } from './models';
 import { allowedTransitions, canTransition } from './state-machine';
+import { vatFor, vatView } from './vat';
 
 const RESERVATION_MINUTES = 30;
 
@@ -63,6 +64,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       address: o.address,
       eta: o.eta,
       notes: o.notes,
+      vat: vatView(o),
       stockCommitted: o.stockCommitted,
       reservationExpiresAt: o.reservationExpiresAt,
       createdAt: o.createdAt,
@@ -157,6 +159,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
     }
 
     const pickupAddress = await tx.siteSetting.findUnique({ where: { key: 'pickupAddress' } });
+    const vat = await vatFor(tx, pricing.total);
     const byLine = new Map(pricing.lines.map((l) => [l.lineId, l]));
     const order = await tx.order.create({
       data: {
@@ -171,6 +174,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
         address: dto.method === 'delivery' ? dto.address : typeof pickupAddress?.value === 'string' ? pickupAddress.value : 'Store pickup',
         eta: zone?.eta ?? null,
         notes: dto.notes,
+        ...(vat ? { vatRateBp: vat.rateBp, vatAmount: vat.amount, vatSeller: vat.seller } : {}),
         idempotencyKey,
         reservationExpiresAt: dto.paymentMethod === 'cod' ? null : new Date(Date.now() + RESERVATION_MINUTES * 60_000),
         lines: {

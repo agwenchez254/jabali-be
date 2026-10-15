@@ -22,7 +22,7 @@ import {
   UpdatePageDto,
   UpdateTestimonialDto,
 } from './content.dto';
-import { SettingsService } from './settings.service';
+import { publicSettings, SettingsService } from './settings.service';
 
 @AdminController('content/blocks', 'content_block')
 export class AdminBlocksController {
@@ -192,7 +192,7 @@ export class ContentStoreController {
         this.cms.publishedTestimonials(q.gender),
         this.catalogue.categories({ gender: q.gender }),
         this.catalogue.list({ gender: q.gender, sort: 'popular', limit: 5 }),
-        this.settings.all(),
+        this.settings.all().then(publicSettings),
       ]);
       return { gender: q.gender ?? null, blocks, testimonials, categories, topProducts: top.items, settings };
     });
@@ -210,6 +210,6 @@ export class ContentStoreController {
 
   @Get('settings')
   siteSettings() {
-    return this.cache.wrap('store:settings', 60, () => this.settings.all());
+    return this.cache.wrap('store:settings', 60, async () => publicSettings(await this.settings.all()));
   }
 }

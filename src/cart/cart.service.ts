@@ -6,7 +6,8 @@ import { PricingPromotion, PricingResult, priceCart } from '../promotions/pricin
 import { PromotionsService } from '../promotions/promotions.service';
 import { normalizePhone } from '../common/utils';
 import { CartQuoteDto, QuoteLineDto } from './cart.dto';
-import { CartQuote, CartWarning, PricedCart, ResolvedCart, ResolvedItem } from './models';
+import { CartQuote, CartWarning, PricedCart, QuoteVat, ResolvedCart, ResolvedItem } from './models';
+import { extractVat, loadVat } from '../orders/vat';
 
 /** Used until the admin sets the matching site settings. */
 export const DEFAULT_GIFT_FEE = 350;
@@ -115,10 +116,16 @@ export class CartService {
 
   async quote(dto: CartQuoteDto, opts: { promotions?: PricingPromotion[] } = {}): Promise<CartQuote> {
     const priced = await this.price(this.prisma, dto, opts);
-    return this.format(priced, dto, await this.giftFee());
+    return this.format(priced, dto, await this.giftFee(), await this.vat(priced.pricing.total));
   }
 
-  format(priced: PricedCart, dto: Pick<CartQuoteDto, 'county'>, giftFee = DEFAULT_GIFT_FEE): CartQuote {
+  /** The VAT inside `total` while VAT is on, else null. */
+  private async vat(total: number, db: Db = this.prisma): Promise<QuoteVat | null> {
+    const setting = await loadVat(db);
+    return setting ? { ratePercent: setting.ratePercent, amount: extractVat(total, setting.ratePercent).vat } : null;
+  }
+
+  format(priced: PricedCart, dto: Pick<CartQuoteDto, 'county'>, giftFee = DEFAULT_GIFT_FEE, vat: QuoteVat | null = null): CartQuote {
     const { resolved, pricing, zone, method } = priced;
     const byLine = new Map(pricing.lines.map((l) => [l.lineId, l]));
     return {
@@ -148,6 +155,7 @@ export class CartService {
       deliveryPending: method === 'delivery' && !dto.county,
       codAllowed: priced.codAllowed,
       giftFee,
+      vat,
       delivery: zone ? { zone: zone.name, eta: zone.eta, etaDays: zone.etaDays } : null,
       applied: pricing.applied,
       promo: pricing.code,

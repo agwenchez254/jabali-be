@@ -343,6 +343,11 @@ model Order {
   address              String?
   eta                  String?
   notes                String?
+  /// VAT included in the total, fixed when the order was placed. Null when VAT was off. Rate is in basis points (16% = 1600).
+  vatRateBp            Int?
+  vatAmount            Int?
+  /// Seller details printed on the receipt: { businessName, kraPin, address }
+  vatSeller            Json?
   idempotencyKey       String           @unique
   stockCommitted       Boolean          @default(false)
   reservationExpiresAt DateTime?
