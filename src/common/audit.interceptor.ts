@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
-import type { Request } from 'express';
+import type { FastifyRequest as Request } from 'fastify';
 import { Observable, tap } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from './cache/cache.service';
@@ -66,7 +66,7 @@ export class AuditInterceptor implements NestInterceptor {
           .create({
             data: {
               actorId: req.user?.id,
-              action: `${req.method} ${req.route?.path ?? req.path}`,
+              action: `${req.method} ${req.routeOptions?.url ?? req.url.split('?')[0]}`,
               entity,
               entityId,
               before: toJson(body),

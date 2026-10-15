@@ -1,8 +1,8 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import { AddressInfo } from 'node:net';
 import { loadConfig } from '../src/config/config';
-import { configureApp } from '../src/setup';
+import { configureApp, createAdapter } from '../src/setup';
 import { TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD } from './global-setup';
 
 const TEST_URL = process.env.TEST_DATABASE_URL ?? 'postgresql://jabali:jabali_dev_pw@localhost:5439/jabali_test?schema=public';
@@ -47,7 +47,7 @@ async function openStream(url: string) {
 }
 
 describe('GET /store/events', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   let auth: Record<string, string>;
 
@@ -56,8 +56,9 @@ describe('GET /store/events', () => {
     process.env.ENABLE_SCHEDULER = 'false';
     const { AppModule } = await import('../src/app.module');
     const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = mod.createNestApplication<NestExpressApplication>();
-    configureApp(app, loadConfig());
+    const cfg = loadConfig();
+    app = mod.createNestApplication<NestFastifyApplication>(createAdapter(cfg));
+    await configureApp(app, cfg);
     await app.listen(0);
     base = `http://127.0.0.1:${(app.getHttpServer().address() as AddressInfo).port}/api/v1`;
     const login = await fetch(`${base}/admin/auth/login`, {

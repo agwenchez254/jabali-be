@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
+import type { FastifyRequest as Request } from 'fastify';
 import { SecurityLogService } from '../security-log/security-log.service';
 import { AccessTokenPayload, AuthUser } from './auth.types';
 

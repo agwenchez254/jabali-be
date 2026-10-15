@@ -3,6 +3,7 @@ import { OrderStatus, Prisma } from '@prisma/client';
 import { CartService } from '../cart/cart.service';
 import { DomainError } from '../common/problem-details.filter';
 import { CacheService } from '../common/cache/cache.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { StoreEventsService } from '../store-events/store-events.service';
 import { pageArgs, toPage } from '../common/pagination';
 import { formatOrderNumber, isUniqueViolation, normalizePhone } from '../common/utils';
@@ -37,6 +38,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
     private readonly cart: CartService,
     private readonly cache: CacheService,
     private readonly events: StoreEventsService,
+    private readonly notifications: NotificationsService,
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
@@ -66,6 +68,8 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       address: o.address,
       eta: o.eta,
       notes: o.notes,
+      contactName: o.contactName,
+      contactPhone: o.contactPhone,
       vat: vatView(o),
       stockCommitted: o.stockCommitted,
       reservationExpiresAt: o.reservationExpiresAt,
@@ -93,6 +97,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
         status: p.status,
         amount: p.amount,
         providerRef: p.providerRef,
+        payerPhone: p.payerPhone,
         createdAt: p.createdAt,
       })),
       events: o.events.map((e) => ({ id: e.id, type: e.type, note: e.note, data: e.data, actorId: e.actorId, createdAt: e.createdAt })),
@@ -113,6 +118,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       );
       void this.cache.invalidate('store:products').then(() => this.events.emit(['Product', 'Home']));
       const order = await this.prisma.order.findUniqueOrThrow({ where: { id }, include: orderInclude });
+      this.announce('order.created', order);
       return { order: this.view(order), created: true };
     } catch (e) {
       if (isUniqueViolation(e)) {
@@ -120,6 +126,26 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
         if (dup) return { order: this.ownedReplay(dup, customerId), created: false };
       }
       throw e;
+    }
+  }
+
+  /** Pushes a live notification to connected dashboards and to the customer who owns the order. */
+  private announce(kind: 'order.created' | 'order.status', o: OrderFull, previousStatus?: OrderStatus): void {
+    try {
+      this.notifications.publish({
+        kind,
+        orderId: o.id,
+        number: o.number ?? o.id,
+        status: o.status,
+        previousStatus,
+        total: o.total,
+        method: o.method,
+        paymentMethod: o.paymentMethod,
+        customerName: o.customer.name,
+        customerId: o.customerId,
+      });
+    } catch (e) {
+      this.log.warn(`could not publish order notification: ${String(e)}`);
     }
   }
 
@@ -160,6 +186,11 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       await tx.inventory.update({ where: { variantId: item.variantId }, data: { reserved: { increment: item.qty } } });
     }
 
+    const payerPhone = dto.payerPhone?.trim() ? normalizePhone(dto.payerPhone) : null;
+    if (dto.payerPhone?.trim() && !payerPhone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'invalid_phone', 'Enter a valid Kenyan mobile number to pay from.');
+    const contactPhone = dto.contactPhone?.trim() ? normalizePhone(dto.contactPhone) : null;
+    if (dto.contactPhone?.trim() && !contactPhone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'invalid_phone', 'Enter a valid Kenyan mobile number for the delivery contact.');
+
     const pickupAddress = await tx.siteSetting.findUnique({ where: { key: 'pickupAddress' } });
     const vat = await vatFor(tx, pricing.total);
     const byLine = new Map(pricing.lines.map((l) => [l.lineId, l]));
@@ -176,6 +207,8 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
         address: dto.method === 'delivery' ? dto.address : typeof pickupAddress?.value === 'string' ? pickupAddress.value : 'Store pickup',
         eta: zone?.eta ?? null,
         notes: dto.notes,
+        contactName: dto.contactName?.trim() || null,
+        contactPhone,
         ...(vat ? { vatRateBp: vat.rateBp, vatAmount: vat.amount, vatSeller: vat.seller } : {}),
         idempotencyKey,
         reservationExpiresAt: dto.paymentMethod === 'cod' ? null : new Date(Date.now() + RESERVATION_MINUTES * 60_000),
@@ -193,7 +226,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
             gift: (i.gift as Prisma.InputJsonValue | null) ?? Prisma.JsonNull,
           })),
         },
-        payments: { create: { provider: dto.paymentMethod, amount: pricing.total, status: 'pending' } },
+        payments: { create: { provider: dto.paymentMethod, amount: pricing.total, status: 'pending', payerPhone } },
         events: { create: { type: 'created', note: `Order placed (${dto.paymentMethod})` } },
       },
     });
@@ -372,6 +405,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
 
   // ------------------------------------------------------------------ transitions
   async transition(id: string, to: OrderStatus, actor: Actor, note?: string) {
+    let previous: OrderStatus | undefined;
     await this.prisma.$transaction(
       async (tx) => {
         const locked = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM "orders" WHERE id = ${id}::uuid FOR UPDATE`;
@@ -384,6 +418,7 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
         }
         await lockInventory(tx, order.lines.map((l) => l.variantId));
         const label = order.number ?? order.id;
+        previous = order.status;
 
         // stock + payment side effects
         if ((to === 'paid' || to === 'shipped') && !order.stockCommitted) {
@@ -426,6 +461,8 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       { maxWait: 10_000, timeout: 20_000 },
     );
     void this.cache.invalidate('store:products').then(() => this.events.emit(['Product', 'Home']));
+    const after = await this.prisma.order.findUnique({ where: { id }, include: orderInclude });
+    if (after) this.announce('order.status', after, previous);
     return this.get(id);
   }
 

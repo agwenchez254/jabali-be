@@ -1,4 +1,4 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { bootApp, json } from './helpers/app';
 import { lastCode, outbox, registerVerified, Session } from './helpers/auth';
@@ -10,7 +10,7 @@ let seq = 500;
 const phoneFor = (n: number) => `07${String(30000000 + n).slice(-8)}`;
 
 describe('customer auth: names, parallel guesses and parallel resends', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   let prisma: PrismaService;
 

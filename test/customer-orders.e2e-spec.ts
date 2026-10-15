@@ -1,4 +1,4 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD } from './global-setup';
 import { bootApp, json } from './helpers/app';
 import { registerVerified } from './helpers/auth';
@@ -6,7 +6,7 @@ import { registerVerified } from './helpers/auth';
 jest.setTimeout(60_000);
 
 describe('POST /store/orders authentication', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   beforeAll(async () => {
     ({ app, base } = await bootApp({ RATE_LIMIT_ENABLED: 'false' }));

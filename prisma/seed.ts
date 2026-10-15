@@ -6,6 +6,7 @@ import { Gender, Prisma, PrismaClient } from '@prisma/client';
 import { createHash, randomBytes } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { HELP_PAGES } from './help-pages';
 import { seedAccess } from './seed-lib';
 
 try {
@@ -282,6 +283,11 @@ async function main(): Promise<void> {
   };
   for (const [key, value] of Object.entries(settings)) {
     await prisma.siteSetting.upsert({ where: { key }, update: {}, create: { key, value: value ?? Prisma.JsonNull } });
+  }
+
+  // ---- help pages linked from the storefront footer
+  for (const pg of HELP_PAGES) {
+    await prisma.page.upsert({ where: { slug: pg.slug }, update: {}, create: { slug: pg.slug, title: pg.title, blocks: pg.blocks as Prisma.InputJsonValue, status: 'published' } });
   }
 
   // ---- content blocks (published, version 1)

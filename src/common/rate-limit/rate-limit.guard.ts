@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, HttpStatus, Inject, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { Request, Response } from 'express';
+import type { FastifyReply as Response, FastifyRequest as Request } from 'fastify';
 import { APP_CONFIG, AppConfig } from '../../config/config';
 import { DomainError } from '../problem-details.filter';
 import { SecurityLogService } from '../security-log/security-log.service';
@@ -58,11 +58,11 @@ export class RateLimitGuard implements CanActivate {
       if (!subject) continue;
 
       // Route rules are keyed by route path so one route's traffic cannot use up another route's allowance.
-      const path = rule.name === 'default' ? '' : ((req.route as { path?: string } | undefined)?.path ?? '');
+      const path = rule.name === 'default' ? '' : (req.routeOptions?.url ?? '');
       const r = this.limiter.hit(`${rule.name}:${rule.by}:${path}:${subject}`, rule.limit, rule.windowMs);
 
       if (!r.allowed) {
-        res.setHeader('Retry-After', String(r.retryAfterSec));
+        void res.header('Retry-After', String(r.retryAfterSec));
         this.security.log('rate_limited', { rule: rule.name, ip: req.ip });
         throw new DomainError(HttpStatus.TOO_MANY_REQUESTS, 'rate_limited', 'Too many requests. Please wait and try again.');
       }

@@ -8,7 +8,7 @@ function make(created: boolean) {
   const orders = { checkout: jest.fn().mockResolvedValue({ order, created }) };
   const payments = { initiate: jest.fn().mockResolvedValue({ id: 'p1' }) };
   const mail = { sendOrderConfirmation: jest.fn() };
-  const controller = new StoreCheckoutController(orders as never, payments as never, mail as never);
+  const controller = new StoreCheckoutController(orders as never, payments as never, mail as never, {} as never);
   return { controller, orders, payments, mail };
 }
 
@@ -47,7 +47,7 @@ describe('StoreCheckoutController linked guest record', () => {
     const orders = { checkout: jest.fn().mockResolvedValue({ order: guestOrder, created }) };
     const payments = { initiate: jest.fn().mockResolvedValue({ id: 'p1' }) };
     const mail = { sendOrderConfirmation: jest.fn() };
-    const controller = new StoreCheckoutController(orders as never, payments as never, mail as never);
+    const controller = new StoreCheckoutController(orders as never, payments as never, mail as never, {} as never);
     return { call: () => controller.checkout({} as never, customer, 'idem-key-0001', res()), mail };
   }
 

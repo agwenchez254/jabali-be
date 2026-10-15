@@ -35,7 +35,7 @@ export class PaymentsService {
 
   /**
    * Starts payment for a pending order (STK push for M-Pesa). Safe to call again to retry.
-   * `payerPhone` defaults to the customer's phone.
+   * The number prompted is `payerPhone` when given, else the one saved on the payment at checkout, else the customer's phone.
    */
   async initiate(orderId: string, payerPhone?: string): Promise<InitiateOutcome> {
     const order = await this.prisma.order.findUnique({
@@ -44,12 +44,12 @@ export class PaymentsService {
     });
     if (!order) throw new NotFoundException('Order not found');
     if (order.status !== 'pending') throw new DomainError(HttpStatus.CONFLICT, 'order_not_pending', 'This order is not awaiting payment');
-    const phone = normalizePhone(payerPhone ?? order.customer.phone);
+    const phone = normalizePhone(payerPhone ?? order.payments[0]?.payerPhone ?? order.customer.phone);
     if (!phone) throw new DomainError(HttpStatus.UNPROCESSABLE_ENTITY, 'invalid_phone', 'Enter a valid Kenyan mobile number');
 
-    const payment = order.payments[0] ?? (await this.prisma.payment.create({ data: { orderId, provider: order.paymentMethod, amount: order.total } }));
-    if (payment.status === 'failed') {
-      await this.prisma.payment.update({ where: { id: payment.id }, data: { status: 'pending' } });
+    const payment = order.payments[0] ?? (await this.prisma.payment.create({ data: { orderId, provider: order.paymentMethod, amount: order.total, payerPhone: phone } }));
+    if (payment.status === 'failed' || payment.payerPhone !== phone) {
+      await this.prisma.payment.update({ where: { id: payment.id }, data: { status: 'pending', payerPhone: phone } });
     }
     const { adapter, mock } = this.adapterFor(order.paymentMethod);
     const result = await adapter.initiate({
@@ -73,7 +73,28 @@ export class PaymentsService {
         },
       }),
     ]);
-    return { status: result.status, provider: order.paymentMethod, message: result.message, reference: result.providerRef, mock };
+    if (mock && result.status === 'pending' && this.mockAutopay) this.simulateSuccess(payment.id, orderId, order.paymentMethod);
+    return { status: result.status, provider: order.paymentMethod, message: result.message, reference: result.providerRef, mock, payerPhone: phone };
+  }
+
+  /**
+   * Development stand-in for a provider callback: with no payment provider configured, a mock payment succeeds a few
+   * seconds after the prompt is sent, so checkout can be exercised end to end. Never runs in production, and can be
+   * switched off with PAYMENTS_MOCK_AUTOPAY=false.
+   */
+  private get mockAutopay(): boolean {
+    return this.cfg.nodeEnv !== 'production' && process.env.PAYMENTS_MOCK_AUTOPAY !== 'false';
+  }
+
+  private simulateSuccess(paymentId: string, orderId: string, provider: PaymentProvider): void {
+    const delayMs = Number(process.env.PAYMENTS_MOCK_DELAY_MS ?? 4000);
+    setTimeout(() => {
+      void (async () => {
+        const payment = await this.prisma.payment.findUnique({ where: { id: paymentId }, include: { order: true } });
+        if (!payment || payment.status !== 'pending') return;
+        await this.settle(paymentId, orderId, payment.order.status, { receipt: `MOCK${paymentId.slice(0, 8).toUpperCase()}`, raw: { mock: true } }, provider);
+      })().catch((e: unknown) => this.log.warn(`mock payment settle failed: ${String(e)}`));
+    }, Number.isFinite(delayMs) ? delayMs : 4000).unref();
   }
 
   /** Customer-facing retry: order number + phone must match the order. */
@@ -115,14 +136,14 @@ export class PaymentsService {
     return this.settle(payment.id, payment.orderId, payment.order.status, { receipt, raw: rawBody });
   }
 
-  private async settle(paymentId: string, orderId: string, orderStatus: string, info: { receipt: string; raw: unknown }) {
+  private async settle(paymentId: string, orderId: string, orderStatus: string, info: { receipt: string; raw: unknown }, provider: PaymentProvider = 'mpesa') {
     const claimed = await this.prisma.payment.updateMany({
       where: { id: paymentId, status: 'pending' },
       data: { status: 'paid', raw: jsonSafe(info.raw) },
     });
     if (claimed.count !== 1) return { handled: false, reason: 'already_settled' };
     if (orderStatus === 'pending') {
-      await this.orders.transition(orderId, 'paid', { label: 'mpesa' }, info.receipt ? `M-Pesa receipt ${info.receipt}` : 'M-Pesa payment confirmed');
+      await this.orders.transition(orderId, 'paid', { label: provider }, info.receipt ? `${provider} receipt ${info.receipt}` : `${provider} payment confirmed`);
     } else {
       // e.g. the reservation expired before the customer paid: flag for staff to refund or reinstate
       await this.prisma.orderEvent.create({

@@ -1,4 +1,4 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadConfig } from '../src/config/config';
@@ -7,7 +7,7 @@ import { bootApp, json } from './helpers/app';
 jest.setTimeout(60_000);
 
 describe('response hardening', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   beforeAll(async () => {
     ({ app, base } = await bootApp({ RATE_LIMIT_ENABLED: 'false' }));

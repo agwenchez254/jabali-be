@@ -1,4 +1,4 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SecurityLogService } from '../src/common/security-log/security-log.service';
 import { APP_CONFIG, AppConfig } from '../src/config/config';
 import { TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD } from './global-setup';
@@ -11,7 +11,7 @@ const PASSWORD = 'Sunrise-over-Nairobi-42';
 const acct = (email: string, phone: string) => ({ name: 'Log Tester', email, phone, password: PASSWORD });
 
 describe('security event logging', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   let events: { event: string; fields: Record<string, unknown> }[];
 

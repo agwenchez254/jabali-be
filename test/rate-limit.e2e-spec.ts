@@ -1,10 +1,10 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { bootApp, json } from './helpers/app';
 
 jest.setTimeout(120_000);
 
 describe('rate limiting', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   beforeAll(async () => {
     ({ app, base } = await bootApp({ RATE_LIMIT_ENABLED: 'true' }));

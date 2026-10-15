@@ -1,6 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, HttpCode, Param, ParseUUIDPipe, Post, Query, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { Response } from 'express';
+import type { FastifyReply } from 'fastify';
 import { AuthUser } from '../common/auth/auth.types';
 import { AdminController, CurrentUser, RequirePermissions } from '../common/auth/decorators';
 import { AdminOrderListQuery, RefundDto, TrackQuery, TransitionDto } from './orders.dto';
@@ -17,8 +17,8 @@ export class AdminOrdersController {
 
   /** CSV of the filtered list (max 10 000 rows). */
   @Get('export') @RequirePermissions('order:read')
-  async export(@Query() q: AdminOrderListQuery, @Res({ passthrough: true }) res: Response): Promise<string> {
-    res.type('text/csv').attachment(`orders-${new Date().toISOString().slice(0, 10)}.csv`);
+  async export(@Query() q: AdminOrderListQuery, @Res({ passthrough: true }) res: FastifyReply): Promise<string> {
+    res.type('text/csv').header('Content-Disposition', `attachment; filename="orders-${new Date().toISOString().slice(0, 10)}.csv"`);
     return this.orders.exportCsv(q);
   }
 

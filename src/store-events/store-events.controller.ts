@@ -1,6 +1,6 @@
-import { Controller, Header, HttpStatus, MessageEvent, Req, Sse } from '@nestjs/common';
+import { Controller, Header, HttpStatus, MessageEvent, Req, Res, Sse } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { defer, finalize, interval, map, merge, Observable } from 'rxjs';
 import { DomainError } from '../common/problem-details.filter';
 import { ConnectionCounter } from '../common/rate-limit/rate-limiter';
@@ -22,7 +22,14 @@ export class StoreEventsController {
    */
   @Sse('events')
   @Header('X-Accel-Buffering', 'no')
-  stream(@Req() req: Request): Observable<MessageEvent> {
+  stream(@Req() req: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply): Observable<MessageEvent> {
+    // Nest writes SSE headers on the raw Node response, so the headers @fastify/cors put on the Fastify reply never
+    // reach the browser. Set them on the raw response too (the stream is public and sends no credentials).
+    const origin = req.headers.origin;
+    if (origin) {
+      reply.raw.setHeader('Access-Control-Allow-Origin', '*');
+      reply.raw.setHeader('Access-Control-Expose-Headers', 'ETag, Retry-After');
+    }
     const release = this.streams.acquire(req.ip ?? 'unknown', MAX_STREAMS_PER_IP);
     if (!release) throw new DomainError(HttpStatus.TOO_MANY_REQUESTS, 'too_many_streams', 'Too many open connections');
     const changes = this.events.events$.pipe(

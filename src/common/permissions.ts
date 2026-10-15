@@ -9,6 +9,11 @@ export const PERMISSIONS = [
   'order:read',
   'order:write',
   'order:refund',
+  'customer:read',
+  'customer:write',
+  'blog:read',
+  'blog:write',
+  'blog:publish',
   'content:read',
   'content:write',
   'content:publish',
@@ -40,11 +45,11 @@ export const ROLE_DEFINITIONS: Record<string, { description: string; permissions
   },
   content_editor: {
     description: 'Content, media and testimonials',
-    permissions: ['content:read', 'content:write', 'content:publish', 'media:read', 'media:write', 'product:read'],
+    permissions: ['content:read', 'content:write', 'content:publish', 'blog:read', 'blog:write', 'blog:publish', 'media:read', 'media:write', 'product:read'],
   },
   fulfilment: {
     description: 'Orders and inventory',
-    permissions: ['order:read', 'order:write', 'inventory:read', 'inventory:write', 'product:read'],
+    permissions: ['order:read', 'order:write', 'customer:read', 'inventory:read', 'inventory:write', 'product:read'],
   },
   viewer: { description: 'Read-only', permissions: readOnly },
 };

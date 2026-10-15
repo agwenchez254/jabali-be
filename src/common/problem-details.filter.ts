@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import type { Request, Response } from 'express';
+import type { FastifyReply as Response, FastifyRequest as Request } from 'fastify';
 import { FieldError, ProblemDetails } from './models';
 
 const TITLES: Record<number, string> = {
@@ -38,11 +38,11 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const res = http.getResponse<Response>();
     const problem = this.toProblem(exception, req);
     if (problem.status >= 500) this.log.error(exception instanceof Error ? (exception.stack ?? exception.message) : String(exception));
-    res.status(problem.status).type('application/problem+json').json(problem);
+    void res.status(problem.status).type('application/problem+json').send(problem);
   }
 
   private toProblem(exception: unknown, req: Request): ProblemDetails {
-    const instance = req.originalUrl;
+    const instance = req.url;
     const base = (status: number, detail?: string, extra: Partial<ProblemDetails> = {}): ProblemDetails => ({
       type: 'about:blank',
       title: TITLES[status] ?? 'Error',
@@ -83,11 +83,13 @@ export class ProblemDetailsFilter implements ExceptionFilter {
           break;
       }
     }
-    // body-parser (http-errors) client errors, e.g. a body over the size limit.
-    const client = exception as { status?: unknown; type?: unknown } | null;
-    if (typeof client?.status === 'number' && client.status >= 400 && client.status < 500 && typeof client.type === 'string') {
-      const detail = client.type === 'entity.too.large' ? 'Request body is too large' : 'Malformed request body';
-      return base(client.status, detail, { code: client.type });
+    // Fastify client errors (FST_ERR_CTP_*, FST_REQ_FILE_TOO_LARGE, ...), e.g. a body over the size limit.
+    const client = exception as { statusCode?: unknown; code?: unknown } | null;
+    if (typeof client?.statusCode === 'number' && client.statusCode >= 400 && client.statusCode < 500 && typeof client.code === 'string') {
+      const tooLarge = client.statusCode === 413;
+      return base(client.statusCode, tooLarge ? 'Request body is too large' : 'Malformed request body', {
+        code: tooLarge ? 'entity.too.large' : 'request.malformed',
+      });
     }
     return base(HttpStatus.INTERNAL_SERVER_ERROR, 'Unexpected error');
   }

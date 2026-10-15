@@ -29,7 +29,14 @@ describe('JwtAuthGuard (staff)', () => {
 });
 
 describe('CustomerAuthGuard', () => {
-  const guard = new CustomerAuthGuard(jwt, { log: jest.fn() } as never);
+  const findAccount = jest.fn().mockResolvedValue({ status: 'active' });
+  const guard = new CustomerAuthGuard(jwt, { log: jest.fn() } as never, { customerAccount: { findUnique: findAccount } } as never);
+
+  it('rejects a deactivated account even with a valid token', async () => {
+    findAccount.mockResolvedValueOnce({ status: 'disabled' });
+    const { context } = ctx(await customerToken());
+    await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
 
   it('accepts a customer token and exposes the customer', async () => {
     const { req, context } = ctx(await customerToken());

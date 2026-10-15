@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 import { TokenPair } from '../auth/models';
 import { CustomerAuthUser } from '../common/auth/auth.types';
 import { CurrentCustomer } from '../common/auth/customer.decorators';
@@ -20,7 +20,7 @@ const body = (customer: CustomerView, t: TokenPair) => ({
   refreshExpiresAt: t.refreshExpiresAt,
 });
 
-const meta = (req: Request) => ({ ip: req.ip, userAgent: req.get('user-agent') });
+const meta = (req: FastifyRequest) => ({ ip: req.ip, userAgent: req.headers['user-agent'] });
 
 @ApiTags('store')
 @Controller('store/auth')
@@ -30,7 +30,7 @@ export class CustomerAuthController {
   @Post('register')
   @RateLimit(perMinute('register', 5, 'ip'), perHour('register-email', 6, 'email'))
   /** Creates a pending account and emails a 6-digit code. Tokens only come from `verify`. */
-  async register(@Body() dto: RegisterDto, @Req() req: Request): Promise<VerificationStarted> {
+  async register(@Body() dto: RegisterDto, @Req() req: FastifyRequest): Promise<VerificationStarted> {
     return this.auth.register(dto, meta(req));
   }
 
@@ -38,7 +38,7 @@ export class CustomerAuthController {
   @Post('verify')
   @HttpCode(200)
   @RateLimit(perMinute('verify', 10, 'ip'), perMinute('verify-email', 10, 'email'))
-  async verify(@Body() dto: VerifyEmailDto, @Req() req: Request) {
+  async verify(@Body() dto: VerifyEmailDto, @Req() req: FastifyRequest) {
     const { customer, tokens } = await this.auth.verify(dto.email, dto.code, dto.password, meta(req));
     return body(customer, tokens);
   }
@@ -55,7 +55,7 @@ export class CustomerAuthController {
   @Post('login')
   @HttpCode(200)
   @RateLimit(perMinute('login', 10, 'ip'), perMinute('login-email', 5, 'email'))
-  async login(@Body() dto: CustomerLoginDto, @Req() req: Request) {
+  async login(@Body() dto: CustomerLoginDto, @Req() req: FastifyRequest) {
     const { customer, tokens } = await this.auth.login(dto.email, dto.password, meta(req));
     return body(customer, tokens);
   }
@@ -63,7 +63,7 @@ export class CustomerAuthController {
   @Post('refresh')
   @HttpCode(200)
   @RateLimit(perMinute('refresh', 30, 'ip'))
-  async refresh(@Body() dto: CustomerRefreshDto, @Req() req: Request) {
+  async refresh(@Body() dto: CustomerRefreshDto, @Req() req: FastifyRequest) {
     const { customer, tokens } = await this.auth.refresh(dto.refreshToken, meta(req));
     return body(customer, tokens);
   }

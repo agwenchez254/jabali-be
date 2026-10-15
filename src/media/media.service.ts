@@ -10,6 +10,8 @@ import { sniffImage } from './image-info';
 import { MediaListQuery, RegisterExternalMediaDto, UpdateMediaDto } from './media.dto';
 
 const EXTERNAL_PREFIX = 'ext-';
+/** Most images accepted by one POST /admin/media/batch request. */
+export const MAX_BATCH_FILES = 20;
 
 @Injectable()
 export class MediaService {
@@ -36,7 +38,7 @@ export class MediaService {
 
   private readonly include = { _count: { select: { productImages: true, categories: true, testimonials: true } } } as const;
 
-  async upload(file: Express.Multer.File | undefined, alt: string | undefined, userId: string) {
+  async upload(file: { buffer: Buffer; size: number } | undefined, alt: string | undefined, userId: string) {
     if (!file) throw new UnsupportedMediaTypeException('Send the image as multipart field "file"');
     const info = sniffImage(file.buffer);
     if (!info) throw new UnsupportedMediaTypeException('Only JPEG, PNG, WebP, GIF and AVIF images are accepted');

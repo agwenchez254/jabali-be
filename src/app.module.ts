@@ -19,6 +19,9 @@ import { MediaModule } from './media/media.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.service';
+import { CustomersModule } from './customers/customers.module';
+import { BlogModule } from './blog/blog.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { StaffModule } from './staff/staff.module';
 import { StoreEventsModule } from './store-events/store-events.module';
@@ -29,6 +32,7 @@ import { StoreEventsModule } from './store-events/store-events.module';
     PrismaModule,
     CacheModule,
     StoreEventsModule,
+    NotificationsModule,
     RateLimitModule,
     SecurityLogModule,
     MailModule,
@@ -43,6 +47,8 @@ import { StoreEventsModule } from './store-events/store-events.module';
     OrdersModule,
     PaymentsModule,
     CheckoutModule,
+    CustomersModule,
+    BlogModule,
     ContentModule,
     MediaModule,
     AnalyticsModule,

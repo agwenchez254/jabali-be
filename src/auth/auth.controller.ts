@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { CookieOptions, Request, Response } from 'express';
+import type { CookieSerializeOptions } from '@fastify/cookie';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AnyStaff, AdminController, CurrentUser } from '../common/auth/decorators';
 import { AuthUser } from '../common/auth/auth.types';
 import { APP_CONFIG, AppConfig } from '../config/config';
@@ -18,7 +19,7 @@ export class AuthController {
     @Inject(APP_CONFIG) private readonly cfg: AppConfig,
   ) {}
 
-  private cookieOpts(expires?: Date): CookieOptions {
+  private cookieOpts(expires?: Date): CookieSerializeOptions {
     return {
       httpOnly: true,
       secure: this.cfg.nodeEnv === 'production',
@@ -41,25 +42,25 @@ export class AuthController {
   /** Returns tokens in the body AND sets the httpOnly refresh cookie. */
   @Post('login')
   @HttpCode(200)
-  async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const { user, tokens } = await this.auth.login(dto.email, dto.password, { ip: req.ip, userAgent: req.get('user-agent') });
-    res.cookie(REFRESH_COOKIE, tokens.refreshToken, this.cookieOpts(tokens.refreshExpiresAt));
+  async login(@Body() dto: LoginDto, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
+    const { user, tokens } = await this.auth.login(dto.email, dto.password, { ip: req.ip, userAgent: req.headers['user-agent'] });
+    res.setCookie(REFRESH_COOKIE, tokens.refreshToken, this.cookieOpts(tokens.refreshExpiresAt));
     return this.body(user, tokens);
   }
 
   /** Rotates the refresh token. Send it in the body or rely on the cookie. */
   @Post('refresh')
   @HttpCode(200)
-  async refresh(@Body() dto: RefreshDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async refresh(@Body() dto: RefreshDto, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const raw = dto.refreshToken ?? (req.cookies as Record<string, string | undefined>)?.[REFRESH_COOKIE];
-    const { user, tokens } = await this.auth.refresh(raw, { ip: req.ip, userAgent: req.get('user-agent') });
-    res.cookie(REFRESH_COOKIE, tokens.refreshToken, this.cookieOpts(tokens.refreshExpiresAt));
+    const { user, tokens } = await this.auth.refresh(raw, { ip: req.ip, userAgent: req.headers['user-agent'] });
+    res.setCookie(REFRESH_COOKIE, tokens.refreshToken, this.cookieOpts(tokens.refreshExpiresAt));
     return this.body(user, tokens);
   }
 
   @Post('logout')
   @HttpCode(204)
-  async logout(@Body() dto: RefreshDto, @Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
+  async logout(@Body() dto: RefreshDto, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply): Promise<void> {
     const raw = dto.refreshToken ?? (req.cookies as Record<string, string | undefined>)?.[REFRESH_COOKIE];
     await this.auth.logout(raw);
     res.clearCookie(REFRESH_COOKIE, this.cookieOpts());

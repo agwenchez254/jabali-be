@@ -97,6 +97,36 @@ describe('verificationCodeEmail', () => {
   });
 });
 
+describe('orderConfirmationEmail VAT', () => {
+  const vat = { ratePercent: 16, amount: 862, net: 5388, seller: { businessName: 'Jabali Ltd', kraPin: 'P051234567Z', address: 'Kimathi House, Nairobi' } };
+
+  it('shows the VAT inside the total and who the seller is when VAT was on for the order', () => {
+    const mail = orderConfirmationEmail({ order: order({ vat }), storeUrl: store });
+    for (const part of [mail.html, mail.text]) {
+      expect(part).toContain('VAT');
+      expect(part).toContain('KES 862');
+      expect(part).toContain('KES 5,388');
+      expect(part).toContain('Jabali Ltd');
+      expect(part).toContain('P051234567Z');
+    }
+    expect(mail.html).toContain('16%');
+  });
+
+  it('shows no VAT lines for an order placed while VAT was off', () => {
+    for (const vatOff of [null, undefined]) {
+      const mail = orderConfirmationEmail({ order: order({ vat: vatOff }), storeUrl: store });
+      expect(mail.text).not.toContain('Sold by');
+      expect(mail.html).not.toContain('KRA PIN');
+      expect(mail.text).not.toMatch(/VAT \d/);
+    }
+  });
+
+  it('escapes the seller details', () => {
+    const mail = orderConfirmationEmail({ order: order({ vat: { ...vat, seller: { ...vat.seller, businessName: '<script>x</script>' } } }), storeUrl: store });
+    expect(mail.html).not.toContain('<script>');
+  });
+});
+
 describe('orderConfirmationEmail', () => {
   const mail = orderConfirmationEmail({ order: order(), storeUrl: store });
 

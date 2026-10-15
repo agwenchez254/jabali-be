@@ -38,6 +38,9 @@ export class CheckoutDto {
   @ValidateIf((o: CheckoutDto) => o.method === 'delivery') @IsString() @MinLength(3) @MaxLength(300) address?: string;
   @IsIn(['cod', 'mpesa', 'airtel', 'card']) paymentMethod: PaymentProvider;
   @IsOptional() @IsString() @MaxLength(500) notes?: string;
+  /** Who receives the order, when that is not the account holder. */
+  @IsOptional() @IsString() @MaxLength(120) contactName?: string;
+  @IsOptional() @IsString() @MaxLength(20) contactPhone?: string;
   /** Mobile-money number to prompt, when it is not the account's phone. */
   @IsOptional() @IsString() @MaxLength(20) payerPhone?: string;
 }

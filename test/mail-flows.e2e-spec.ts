@@ -1,4 +1,4 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { bootApp, json } from './helpers/app';
 import { startSmtp, TestSmtp } from './helpers/smtp';
 
@@ -13,7 +13,7 @@ const account = (over: Record<string, unknown> = {}) => {
 
 describe('verification and welcome emails over real SMTP', () => {
   let smtp: TestSmtp;
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   beforeAll(async () => {
     smtp = await startSmtp();
@@ -58,7 +58,7 @@ describe('verification and welcome emails over real SMTP', () => {
 });
 
 describe('sign-up when the mail server is down', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   beforeAll(async () => {
     const smtp = await startSmtp();

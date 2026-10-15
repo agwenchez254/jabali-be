@@ -7,4 +7,6 @@ export interface InitiateOutcome {
   /** Daraja CheckoutRequestID (or mock reference) the client can poll with via order tracking. */
   reference: string | null;
   mock: boolean;
+  /** The number that was prompted. */
+  payerPhone: string;
 }

@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import compress from '@fastify/compress';
 import { AppModule } from './app.module';
 import { loadConfig } from './config/config';
-import { configureApp } from './setup';
-import compression from 'compression'
+import { configureApp, createAdapter } from './setup';
 
 async function bootstrap(): Promise<void> {
   try {
@@ -14,10 +14,11 @@ async function bootstrap(): Promise<void> {
     /* no .env file: rely on the process environment */
   }
   const cfg = loadConfig();
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.use(compression()); configureApp(app, cfg, { swagger: true });
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, createAdapter(cfg), { rawBody: true });
+  await app.register(compress);
+  await configureApp(app, cfg, { swagger: true });
   app.enableShutdownHooks();
-  await app.listen(cfg.port);
+  await app.listen(cfg.port, process.env.HOST ?? '0.0.0.0');
   new Logger('Bootstrap').log(`API on http://localhost:${cfg.port}/api/v1  docs: /api/docs`);
 }
 

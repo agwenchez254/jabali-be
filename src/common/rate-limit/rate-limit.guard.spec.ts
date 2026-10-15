@@ -11,7 +11,7 @@ const ctx = (handler: () => void, body: unknown = {}): ExecutionContext =>
   ({
     getHandler: () => handler,
     getClass: () => Routes,
-    switchToHttp: () => ({ getRequest: () => ({ ip: '10.0.0.1', body, route: { path: '/x' } }), getResponse: () => ({ setHeader: jest.fn() }) }),
+    switchToHttp: () => ({ getRequest: () => ({ ip: '10.0.0.1', body, routeOptions: { url: '/x' } }), getResponse: () => ({ header: jest.fn() }) }),
   }) as unknown as ExecutionContext;
 
 const guard = () => new RateLimitGuard(new Reflector(), { log: jest.fn() } as never, { rateLimitEnabled: true } as never);

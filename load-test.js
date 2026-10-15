@@ -3,9 +3,10 @@ import { check } from "k6";
 
 export const options = {
   stages: [
-    { duration: "10s", target: 10 },
-    { duration: "20s", target: 50 },
-    { duration: "10s", target: 0 },
+    { duration: "15s", target: 50 }, // Warm-up: Ramp up to 50 VUs over 15 seconds
+    { duration: "30s", target: 200 }, // Heavy Load: Ramp up to 200 VUs over 30 seconds
+    { duration: "30s", target: 1200 }, // Peak Stress: Push to 500 VUs over 30 seconds
+    { duration: "15s", target: 0 }, // Cooldown: Scale back down to 0
   ],
 };
 

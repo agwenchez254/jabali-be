@@ -10,6 +10,7 @@ export interface StoreEvent {
 const ENTITY_TAGS: Record<string, readonly string[]> = {
   content_block: ['Home', 'Content'],
   page: ['Home', 'Content'],
+  blog_post: ['Blog'],
   product: ['Product', 'Home'],
   variant: ['Product', 'Home'],
   colour: ['Product', 'Home'],

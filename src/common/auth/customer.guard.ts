@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { Request } from 'express';
+import type { FastifyRequest as Request } from 'fastify';
+import { PrismaService } from '../../prisma/prisma.service';
 import { SecurityLogService } from '../security-log/security-log.service';
 import { CustomerAuthUser, CustomerTokenPayload } from './auth.types';
 
@@ -10,6 +11,7 @@ export class CustomerAuthGuard implements CanActivate {
   constructor(
     private readonly jwt: JwtService,
     private readonly security: SecurityLogService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -26,6 +28,9 @@ export class CustomerAuthGuard implements CanActivate {
       this.security.log('token_type_rejected', { ip: req.ip, expected: 'customer' });
       throw new UnauthorizedException('Invalid or expired token');
     }
+    // A deactivated account loses access at once, not when its token expires.
+    const account = await this.prisma.customerAccount.findUnique({ where: { id: payload.sub }, select: { status: true } });
+    if (!account || account.status !== 'active') throw new UnauthorizedException('Account disabled');
     req.customer = { accountId: payload.sub, customerId: payload.cid, email: payload.email, name: payload.name };
     return true;
   }

@@ -1,4 +1,4 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD } from './global-setup';
 import { bootApp, json } from './helpers/app';
@@ -12,7 +12,7 @@ const uniq = () => ++seq;
 const phoneFor = (n: number) => `07${String(10000000 + n).slice(-8)}`; // 07 + 8 digits
 
 describe('customer auth', () => {
-  let app: NestExpressApplication;
+  let app: NestFastifyApplication;
   let base: string;
   let prisma: PrismaService;
 
