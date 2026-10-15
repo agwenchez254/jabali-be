@@ -15,6 +15,8 @@ import { allowedTransitions, canTransition } from './state-machine';
 import { vatFor, vatView } from './vat';
 
 const RESERVATION_MINUTES = 30;
+/** Order events a customer may see on their timeline. */
+const CUSTOMER_EVENTS = new Set(['created', 'status:paid', 'status:packed', 'status:shipped', 'status:delivered', 'status:cancelled', 'status:refunded']);
 
 const orderInclude = {
   customer: true,
@@ -256,6 +258,74 @@ export class OrdersService implements OnModuleInit, OnModuleDestroy {
       page,
       pageSize,
     );
+  }
+
+  /** The customer's own orders, newest first. */
+  async listForCustomer(customerId: string, page: number, limit: number) {
+    const where = { customerId };
+    const [total, rows] = await this.prisma.$transaction([
+      this.prisma.order.count({ where }),
+      this.prisma.order.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        include: { _count: { select: { lines: true } }, payments: { orderBy: { createdAt: 'desc' }, take: 1 } },
+      }),
+    ]);
+    const items = rows.map((o) => ({
+      number: o.number,
+      status: o.status,
+      paymentStatus: o.payments[0]?.status ?? 'pending',
+      method: o.method,
+      paymentMethod: o.paymentMethod,
+      total: o.total,
+      lineCount: o._count.lines,
+      createdAt: o.createdAt,
+    }));
+    return { items, total, page, limit };
+  }
+
+  /**
+   * One of the customer's own orders, for the order page and the receipt. Shows the account's name and email
+   * (never those of a linked guest record) and none of the staff-only fields.
+   */
+  async detailForCustomer(me: { customerId: string; name: string; email: string }, number: string) {
+    const o = await this.prisma.order.findFirst({ where: { number: number.toUpperCase(), customerId: me.customerId }, include: orderInclude });
+    if (!o) throw new NotFoundException('Order not found');
+    return {
+      number: o.number,
+      status: o.status,
+      method: o.method,
+      paymentMethod: o.paymentMethod,
+      paymentStatus: o.payments[o.payments.length - 1]?.status ?? 'pending',
+      createdAt: o.createdAt,
+      eta: o.eta,
+      county: o.county,
+      address: o.address,
+      notes: o.notes,
+      contactName: o.contactName,
+      contactPhone: o.contactPhone,
+      subtotal: o.subtotal,
+      discount: o.discount,
+      deliveryFee: o.deliveryFee,
+      total: o.total,
+      vat: vatView(o),
+      customer: { name: me.name, email: me.email, phone: o.customer.phone },
+      lines: o.lines.map((l) => ({
+        id: l.id,
+        name: l.nameSnapshot,
+        colour: l.colourSnapshot,
+        size: l.size,
+        qty: l.qty,
+        unitPrice: l.unitPrice,
+        discount: l.discountAmount,
+        lineTotal: l.unitPrice * l.qty - l.discountAmount,
+        giftTo: typeof (l.gift as { to?: unknown } | null)?.to === 'string' ? (l.gift as { to: string }).to : l.gift ? '' : undefined,
+      })),
+      payments: o.payments.map((p) => ({ provider: p.provider, status: p.status, amount: p.amount, payerPhone: p.payerPhone, createdAt: p.createdAt })),
+      timeline: o.events.filter((e) => CUSTOMER_EVENTS.has(e.type)).map((e) => ({ type: e.type.replace('status:', ''), at: e.createdAt })),
+    };
   }
 
   async get(id: string) {
